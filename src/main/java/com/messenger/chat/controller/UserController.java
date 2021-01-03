@@ -32,6 +32,6 @@ public class UserController {
 
     @DeleteMapping(value = "deleteUser")
     public void deleteUser(@RequestParam Long userId) {
-        userService.delteUser(userId);
+        userService.deleteUser(userId);
     }
 }

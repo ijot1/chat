@@ -2,6 +2,8 @@ package com.messenger.chat.domain;
 
 import lombok.*;
 
+import java.time.LocalDate;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -13,6 +15,7 @@ public class UserDto {
     private String name;
     private char sex;
     private String location;
+    private LocalDate createdOn;
     private String password;
     private boolean loggedIn;
 }

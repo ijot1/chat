@@ -5,10 +5,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 
+@Data
 @AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
 @Builder
 public class MessageDto {
     private Long id;

@@ -25,17 +25,16 @@ public class UserRepositoryTestSuite {
 
         //Given
         User user = User.builder()
-                .id(null)
                 .nick("ijot")
                 .name("Irena-Janik")
                 .sex('W')
                 .location("Bangalore")
                 .password("Zaq12wsx")
                 .loggedIn(true)
-                .messages(new ArrayList<>())
-                .rooms(new HashSet<>())
-                .friendshipOwners(new HashSet<>())
+                .messages(new HashSet<>())
+                .messageRecipients(new HashSet<>())
                 .friends(new HashSet<>())
+                .friendshipOwners(new HashSet<>())
                 .build();
 
         //When
@@ -53,10 +52,8 @@ public class UserRepositoryTestSuite {
 
     @Test
     public void testGetUsers() {
-
         //Given
         User user1 = User.builder()
-                .id(null)
                 .nick("ij")
                 .name("Irena-Janik")
                 .sex('W')
@@ -64,14 +61,13 @@ public class UserRepositoryTestSuite {
                 .createdOn(LocalDate.now())
                 .password("Zaq12wsx")
                 .loggedIn(true)
-                .messages(new ArrayList<>())
-                .rooms(new HashSet<>())
-                .friendshipOwners(new HashSet<>())
+                .messages(new HashSet<>())
+                .messageRecipients(new HashSet<>())
                 .friends(new HashSet<>())
+                .friendshipOwners(new HashSet<>())
                 .build();
 
         User user2 = User.builder()
-                .id(null)
                 .nick("jk")
                 .name("Janina-Kranik")
                 .sex('W')
@@ -79,14 +75,13 @@ public class UserRepositoryTestSuite {
                 .createdOn(LocalDate.now())
                 .password("Zaq12wsx")
                 .loggedIn(true)
-                .messages(new ArrayList<>())
-                .rooms(new HashSet<>())
-                .friendshipOwners(new HashSet<>())
+                .messages(new HashSet<>())
+                .messageRecipients(new HashSet<>())
                 .friends(new HashSet<>())
+                .friendshipOwners(new HashSet<>())
                 .build();
 
         User user3 = User.builder()
-                .id(null)
                 .nick("kk")
                 .name("Karina-Kranik")
                 .sex('W')
@@ -94,24 +89,11 @@ public class UserRepositoryTestSuite {
                 .createdOn(LocalDate.now())
                 .password("Zaq12wsx")
                 .loggedIn(true)
-                .messages(new ArrayList<>())
-                .rooms(new HashSet<>())
-                .friendshipOwners(new HashSet<>())
+                .messages(new HashSet<>())
+                .messageRecipients(new HashSet<>())
                 .friends(new HashSet<>())
+                .friendshipOwners(new HashSet<>())
                 .build();
-
-        Message message1 = Message.builder()
-                .messageText("Message #1 text")
-                .dateCreated(LocalDate.now())
-                .build();
-
-        Message message2 = Message.builder()
-                .messageText("Message #2 text")
-                .dateCreated(LocalDate.now())
-                .build();
-
-        user1.addMessage(message1);
-        user1.addMessage(message2);
 
         user1.addFriend(user2);
         user1.addFriend(user3);
@@ -126,6 +108,7 @@ public class UserRepositoryTestSuite {
         Long id1 = userRepository.save(user1).getId();
         Long id2 = userRepository.save(user2).getId();
         Long id3 = userRepository.save(user3).getId();
+
         int count = userRepository.findAll().size();
 
         //Then
@@ -146,7 +129,6 @@ public class UserRepositoryTestSuite {
 
         //Given
         User user1 = User.builder()
-                .id(null)
                 .nick("ij")
                 .name("Irena-Janik")
                 .sex('W')
@@ -154,14 +136,13 @@ public class UserRepositoryTestSuite {
                 .createdOn(LocalDate.now())
                 .password("Zaq12wsx")
                 .loggedIn(true)
-                .messages(new ArrayList<>())
-                .rooms(new HashSet<>())
-                .friendshipOwners(new HashSet<>())
+                .messages(new HashSet<>())
+                .messageRecipients(new HashSet<>())
                 .friends(new HashSet<>())
+                .friendshipOwners(new HashSet<>())
                 .build();
 
         User user2 = User.builder()
-                .id(null)
                 .nick("jk")
                 .name("Janina-Kranik")
                 .sex('W')
@@ -169,14 +150,13 @@ public class UserRepositoryTestSuite {
                 .createdOn(LocalDate.now())
                 .password("Zaq12wsx")
                 .loggedIn(true)
-                .messages(new ArrayList<>())
-                .rooms(new HashSet<>())
-                .friendshipOwners(new HashSet<>())
+                .messages(new HashSet<>())
+                .messageRecipients(new HashSet<>())
                 .friends(new HashSet<>())
+                .friendshipOwners(new HashSet<>())
                 .build();
 
         User user3 = User.builder()
-                .id(null)
                 .nick("kk")
                 .name("Karina-Kranik")
                 .sex('W')
@@ -184,24 +164,11 @@ public class UserRepositoryTestSuite {
                 .createdOn(LocalDate.now())
                 .password("Zaq12wsx")
                 .loggedIn(true)
-                .messages(new ArrayList<>())
-                .rooms(new HashSet<>())
-                .friendshipOwners(new HashSet<>())
+                .messages(new HashSet<>())
+                .messageRecipients(new HashSet<>())
                 .friends(new HashSet<>())
+                .friendshipOwners(new HashSet<>())
                 .build();
-
-        Message message1 = Message.builder()
-                .messageText("Message #1 text")
-                .dateCreated(LocalDate.now())
-                .build();
-
-        Message message2 = Message.builder()
-                .messageText("Message #2 text")
-                .dateCreated(LocalDate.now())
-                .build();
-
-        user1.addMessage(message1);
-        user1.addMessage(message2);
 
         user1.addFriend(user2);
         user1.addFriend(user3);
@@ -209,13 +176,17 @@ public class UserRepositoryTestSuite {
         user2.addFriend(user3);
 
         //When
-        Long id1 = userRepository.save(user1).getId();
-        Long id2 = userRepository.save(user2).getId();
-        Long id3 = userRepository.save(user3).getId();
+        User savedUser1 = userRepository.save(user1);
+        User savedUser2 = userRepository.save(user2);
+        User savedUser3 = userRepository.save(user3);
 
-        int i1 = userRepository.save(user1).getFriends().size();
-        int i2 = userRepository.save(user2).getFriends().size();
-        int i3 = userRepository.save(user3).getFriends().size();
+        Long id1 = savedUser1.getId();
+        Long id2 = savedUser2.getId();
+        Long id3 = savedUser3.getId();
+
+        int i1 = savedUser1.getFriends().size();
+        int i2 = savedUser2.getFriends().size();
+        int i3 = savedUser3.getFriends().size();
 
         //Then
         Assert.assertEquals(2, i1);
@@ -244,10 +215,10 @@ public class UserRepositoryTestSuite {
                 .createdOn(LocalDate.now())
                 .password("Zaq12wsx")
                 .loggedIn(true)
-                .messages(new ArrayList<>())
-                .rooms(new HashSet<>())
-                .friendshipOwners(new HashSet<>())
+                .messages(new HashSet<>())
+                .messageRecipients(new HashSet<>())
                 .friends(new HashSet<>())
+                .friendshipOwners(new HashSet<>())
                 .build();
 
         User user2 = User.builder()
@@ -258,21 +229,16 @@ public class UserRepositoryTestSuite {
                 .createdOn(LocalDate.now())
                 .password("Zaq12wsx")
                 .loggedIn(false)
-                .messages(new ArrayList<>())
-                .rooms(new HashSet<>())
-                .friendshipOwners(new HashSet<>())
+                .messages(new HashSet<>())
+                .messageRecipients(new HashSet<>())
                 .friends(new HashSet<>())
+                .friendshipOwners(new HashSet<>())
                 .build();
 
-
         //When
-        User savedUser1 = userRepository.save(user1);
-        User savedUser2 = userRepository.save(user2);
-        Long id1 = user1.getId();
-        Long id2 = user2.getId();
-        boolean b1 = savedUser1.isLoggedIn();
+        Long id1 = userRepository.save(user1).getId();
+        Long id2 = userRepository.save(user2).getId();
 
-        System.out.println(b1);
         int count = userRepository.findByLoggedInTrue(true).size();
 
         //Then

@@ -1,9 +1,6 @@
 package com.messenger.chat.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -12,33 +9,40 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 @Builder
 @Entity
 @Table(name = "MESSAGES")
 public class Message implements Serializable {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "MESSAGE_ID")
     private Long id;
 
     @Column(name = "MESSAGE_TXT")
     private String messageText;
 
-    @Column(name = "CREATED", nullable = false)
+    @Column(name = "CREATED_ON"/*, nullable = false*/)
     private LocalDate dateCreated;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User messageCreator;
+    @ManyToOne(targetEntity = User.class,
+            cascade = CascadeType.PERSIST,      //!?
+            fetch = FetchType.LAZY)
+    @JoinColumn(name = "CREATED_BY")
+    private User creator;
 
-    @OneToMany(mappedBy = "message")
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "MESSAGE_ID",
+            /*nullable = false,*/ insertable = false, updatable = false
+    )
     private Set<MessageRecipient> messageRecipientSet = new HashSet<>();
 
     public void addMessageRecipient(MessageRecipient messageRecipient) {
-        messageRecipientSet.add(messageRecipient);
+        this.messageRecipientSet.add(messageRecipient);
         messageRecipient.setMessage(this);
     }
 
@@ -52,14 +56,14 @@ public class Message implements Serializable {
         if (this == o) return true;
         if (!(o instanceof Message)) return false;
         Message message = (Message) o;
-        return getId().equals(message.getId()) &&
-                getMessageText().equals(message.getMessageText()) &&
-                getDateCreated().equals(message.getDateCreated()) &&
-                getMessageCreator().equals(message.getMessageCreator());
+        return id.equals(message.id) &&
+                messageText.equals(message.messageText) &&
+                dateCreated.equals(message.dateCreated) &&
+                creator.equals(message.creator);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getMessageText(), getDateCreated(), getMessageCreator());
+        return Objects.hash(id, messageText, dateCreated, creator);
     }
 }

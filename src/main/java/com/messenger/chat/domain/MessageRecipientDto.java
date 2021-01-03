@@ -1,12 +1,18 @@
 package com.messenger.chat.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
+import java.util.Date;
+
+@Data
 @NoArgsConstructor
-@Getter
-@Setter
+@AllArgsConstructor
 @Builder
 public class MessageRecipientDto {
-    private MessageRecipientId id;
+    private Long id;
+    private String addedBy;
+    private Date addedOn;
 }

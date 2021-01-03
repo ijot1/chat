@@ -24,7 +24,7 @@ public class UserService {
 
     public List<UserDto> getLoggedInUsers() {
         return userMapper.mapToUserDtoList(userRepository.findAll().stream()
-                .filter(u -> u.isLoggedIn() == true)
+                .filter(u -> u.isLoggedIn())
                 .collect(Collectors.toList()));
     }
 
@@ -36,7 +36,7 @@ public class UserService {
         return userMapper.mapToUserDto(userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(User.class, id)));
     }
 
-    public void delteUser(Long id) {
+    public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
 }

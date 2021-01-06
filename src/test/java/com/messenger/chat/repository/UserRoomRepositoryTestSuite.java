@@ -30,7 +30,7 @@ public class UserRoomRepositoryTestSuite {
     MessageRecipientRepository messageRecipientRepository;
 
     @Before
-    public void prepareUsersAndRooms() {
+    public void testPrepareUsersAndRooms() {
         User user1 = User.builder()
                 .id(null)
                 .nick("ij")
@@ -90,7 +90,7 @@ public class UserRoomRepositoryTestSuite {
     }
 
     @Test
-    public void testGetUsersRooms() {
+    public void testFindAll() {
         //Given
         User user1 = (User) userRepository.findAll().toArray()[0];
         User user2 = (User) userRepository.findAll().toArray()[1];
@@ -115,6 +115,38 @@ public class UserRoomRepositoryTestSuite {
 
         //Then
         Assert.assertEquals(3, count);
+
+        //Clean up
+        try {
+            roomRepository.deleteById(idx);
+            userRepository.delete(user1);
+            userRepository.delete(user2);
+            userRepository.delete(user3);
+        } catch (Exception e) {
+            //
+        }
+    }
+
+    @Test
+    public void testFindById() {
+        //Given
+        User user1 = (User) userRepository.findAll().toArray()[0];
+        User user2 = (User) userRepository.findAll().toArray()[1];
+        User user3 = (User) userRepository.findAll().toArray()[2];
+
+        Room room = (Room) roomRepository.findAll().toArray()[0];
+        Long idx = room.getId();
+
+        room.addUserRoom(user1);
+        UserRoom savedUserRoom = new UserRoom(user1, room);
+
+        //When
+        userRepository.save(user1);
+        userRoomRepository.save(savedUserRoom);
+        UserRoom readUserRoom = userRoomRepository.findById(savedUserRoom.getUserRoomId()).orElse(null);
+
+        //Then
+        Assert.assertEquals(savedUserRoom, readUserRoom);
 
         //Clean up
         try {

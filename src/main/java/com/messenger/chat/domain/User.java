@@ -1,6 +1,7 @@
 package com.messenger.chat.domain;
 
 import lombok.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -50,7 +51,7 @@ public class User implements Serializable {
             orphanRemoval = true)
     private Set<Message> messages = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MessageRecipient> messageRecipients = new HashSet<>();
 
     @ManyToMany(cascade = CascadeType.PERSIST)  //or CascadeType.MERGE

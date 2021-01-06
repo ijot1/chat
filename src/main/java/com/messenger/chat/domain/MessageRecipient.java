@@ -33,11 +33,11 @@ public class MessageRecipient {
     private Message message;
 
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)    //?cascade = CascadeType.MERGEcascade = CascadeType.MERGE
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)    //?cascade = CascadeType.MERGE
 //    @JoinColumn(name = "MESSAGE_RECIPIENT_ID", insertable = false, updatable = false)
     @JoinColumns({
-            @JoinColumn(name = "user", referencedColumnName = "USER_ID"),
-            @JoinColumn(name = "room", referencedColumnName = "ROOM_ID")
+            @JoinColumn(name = "user", referencedColumnName = "USER_ID", insertable = false, updatable = false),
+            @JoinColumn(name = "room", referencedColumnName = "ROOM_ID", insertable = false, updatable = false)
     })
     private UserRoom userRoom;
 

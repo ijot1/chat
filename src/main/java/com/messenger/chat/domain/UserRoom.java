@@ -1,6 +1,7 @@
 package com.messenger.chat.domain;
 
 import lombok.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -17,7 +18,6 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(name = "USERS_ROOMS")
-//@Immutable
 public class UserRoom implements Serializable {
 
     @EmbeddedId
@@ -28,12 +28,12 @@ public class UserRoom implements Serializable {
     private LocalDate addedOn;
 
     @MapsId("USER_ID")
-    @ManyToOne(cascade = {CascadeType.PERSIST/*, CascadeType.MERGE*/}, fetch = FetchType.LAZY)
+    @ManyToOne   //default for ToOne is EAGER
     @JoinColumn(name = "USER_ID", insertable = false, updatable = false)
     private User user;
 
     @MapsId("ROOM_ID")
-    @ManyToOne(cascade = {CascadeType.PERSIST/*, CascadeType.MERGE*/}, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.PERSIST/*, fetch = FetchType.LAZY*/)
     @JoinColumn(name = "ROOM_ID", insertable = false, updatable = false)
     private Room room;
 

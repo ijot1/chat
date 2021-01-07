@@ -47,7 +47,6 @@ public class UserRoom implements Serializable {
         this.userRoomId.userId = user.getId();
         this.userRoomId.roomId = room.getId();
         this.messageRecipients = new HashSet<>();
-        room.getUserRooms().add(this);
     }
 
     public void addUMessageRecipient(UserRoom userRoom) {

@@ -90,7 +90,7 @@ public class UserRoomRepositoryTestSuite {
     }
 
     @Test
-    public void testFindAll() {
+    public void testGetAllUsersRooms() {
         //Given
         User user1 = (User) userRepository.findAll().toArray()[0];
         User user2 = (User) userRepository.findAll().toArray()[1];
@@ -128,7 +128,7 @@ public class UserRoomRepositoryTestSuite {
     }
 
     @Test
-    public void testFindById() {
+    public void testGetUserRoomById() {
         //Given
         User user1 = (User) userRepository.findAll().toArray()[0];
         User user2 = (User) userRepository.findAll().toArray()[1];
@@ -147,6 +147,78 @@ public class UserRoomRepositoryTestSuite {
 
         //Then
         Assert.assertEquals(savedUserRoom, readUserRoom);
+
+        //Clean up
+        try {
+            roomRepository.deleteById(idx);
+            userRepository.delete(user1);
+            userRepository.delete(user2);
+            userRepository.delete(user3);
+        } catch (Exception e) {
+            //
+        }
+    }
+
+    @Test
+    public void testSaveUserRoom() {
+        //Given
+        User user1 = (User) userRepository.findAll().toArray()[0];
+        User user2 = (User) userRepository.findAll().toArray()[1];
+        User user3 = (User) userRepository.findAll().toArray()[2];
+
+        Room room = (Room) roomRepository.findAll().toArray()[0];
+        Long idx = room.getId();
+
+        room.addUserRoom(user1);
+        UserRoom toSaveUserRoom = new UserRoom(user1, room);
+
+        //When
+        userRepository.save(user1);
+        UserRoom savedUserRoom = userRoomRepository.save(toSaveUserRoom);
+        UserRoom readUserRoom = userRoomRepository.findById(savedUserRoom.getUserRoomId()).orElse(null);
+
+        //Then
+        Assert.assertEquals(toSaveUserRoom, readUserRoom);
+
+        //Clean up
+        try {
+            roomRepository.deleteById(idx);
+            userRepository.delete(user1);
+            userRepository.delete(user2);
+            userRepository.delete(user3);
+        } catch (Exception e) {
+            //
+        }
+    }
+
+    @Test
+    public void testDeleteUserRoom() {
+        //Given
+        User user1 = (User) userRepository.findAll().toArray()[0];
+        User user2 = (User) userRepository.findAll().toArray()[1];
+        User user3 = (User) userRepository.findAll().toArray()[2];
+
+        Room room = (Room) roomRepository.findAll().toArray()[0];
+
+        room.addUserRoom(user3);
+
+        UserRoom userRoom1 = new UserRoom(user1, room);
+        UserRoom userRoom2 = new UserRoom(user2, room);
+
+        //When
+        roomRepository.save(room);
+
+        userRoomRepository.save(userRoom1);
+        userRoomRepository.save(userRoom2);
+
+        userRoomRepository.delete(userRoom2);
+
+        int count = userRoomRepository.findAll().size();
+
+        Long idx = room.getId();
+
+        //Then
+        Assert.assertEquals(2, count);
 
         //Clean up
         try {

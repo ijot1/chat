@@ -41,6 +41,10 @@ public class Message implements Serializable {
     )
     private Set<MessageRecipient> messageRecipientSet = new HashSet<>();
 
+    public Message(String messageText) {
+        this.messageText = messageText;
+    }
+
     public void addMessageRecipient(MessageRecipient messageRecipient) {
         this.messageRecipientSet.add(messageRecipient);
         messageRecipient.setMessage(this);

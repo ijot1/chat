@@ -52,15 +52,12 @@ public class MessageRepositoryTestSuite {
         Long uId = userRepository.save(user).getId();
         System.out.println("userId " + uId);
 
-        Message m = messageRepository.save(message);
-        String str = m.getMessageText();
-        Long id1 = m.getId();
+        String str = messageRepository.save(message).getMessageText();
 
         //Then
         Assert.assertEquals("Message #1 text", str);
 
         //CleanUp
-        messageRepository.deleteById(id1);
         userRepository.deleteById(uId);;
     }
 
@@ -100,20 +97,112 @@ public class MessageRepositoryTestSuite {
         user.addMessage(message2);
         //When
         Long uId = userRepository.save(user).getId();
-        System.out.println("userId " + uId);
 
-        Message m1 = messageRepository.save(message1);
-        Message m2 = messageRepository.save(message2);
+        messageRepository.save(message1);
+        messageRepository.save(message2);
         int count = messageRepository.findAll().size();
-        Long id1 = message1.getId();
-        Long id2 = message2.getId();
 
         //Then
         Assert.assertEquals(2, count);
 
         //CleanUp
-        messageRepository.deleteById(id1);
-        messageRepository.deleteById(id2);
+        userRepository.deleteById(uId);
+    }
+
+    @Test
+    public void testGetMessageById() {
+
+        //Given
+        User user = User.builder()
+                .id(null)
+                .nick("ijot")
+                .name("Irena-Janik")
+                .sex('W')
+                .location("Bangalore")
+                .password("Zaq12wsx")
+                .loggedIn(true)
+                .messages(new HashSet<>())
+                .messageRecipients(new HashSet<>())
+                .friends(new HashSet<>())
+                .friendshipOwners(new HashSet<>())
+                .build();
+
+        Message message1 = Message.builder()
+                .messageText("Message #1 text")
+                .dateCreated(LocalDate.now())
+                .creator(user)
+                .messageRecipientSet(new HashSet<>())
+                .build();
+
+        Message message2 = Message.builder()
+                .messageText("Message #2 text")
+                .dateCreated(LocalDate.now())
+                .creator(user)
+                .messageRecipientSet(new HashSet<>())
+                .build();
+
+        user.addMessage(message1);
+        user.addMessage(message2);
+        //When
+        Long uId = userRepository.save(user).getId();
+        System.out.println("userId " + uId);
+
+        messageRepository.save(message1);
+        Message readMessage = messageRepository.findById(message2.getId()).orElse(new Message("No such Message"));
+
+        //Then
+        Assert.assertEquals(message2, readMessage);
+
+        //CleanUp
+        userRepository.deleteById(uId);
+    }
+
+    @Test
+    public void testDeleteMessageById() {
+
+        //Given
+        User user = User.builder()
+                .id(null)
+                .nick("ijot")
+                .name("Irena-Janik")
+                .sex('W')
+                .location("Bangalore")
+                .password("Zaq12wsx")
+                .loggedIn(true)
+                .messages(new HashSet<>())
+                .messageRecipients(new HashSet<>())
+                .friends(new HashSet<>())
+                .friendshipOwners(new HashSet<>())
+                .build();
+
+        Message message1 = Message.builder()
+                .messageText("Message #1 text")
+                .dateCreated(LocalDate.now())
+                .creator(user)
+                .messageRecipientSet(new HashSet<>())
+                .build();
+
+        Message message2 = Message.builder()
+                .messageText("Message #2 text")
+                .dateCreated(LocalDate.now())
+                .creator(user)
+                .messageRecipientSet(new HashSet<>())
+                .build();
+
+        user.addMessage(message1);
+        user.addMessage(message2);
+        //When
+        Long uId = userRepository.save(user).getId();
+
+        messageRepository.save(message1);
+        Long mId = messageRepository.save(message2).getId();
+        messageRepository.deleteById(mId);
+        int count = messageRepository.findAll().size();
+
+        //Then
+        Assert.assertEquals(1, count);
+
+        //CleanUp
         userRepository.deleteById(uId);
     }
 }

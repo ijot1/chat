@@ -60,6 +60,10 @@ public class User implements Serializable {
     @ManyToMany(mappedBy = "friends")
     private Set<User> friendshipOwners = new HashSet<>();
 
+    public User(String nick) {
+        this.nick = nick;
+    }
+
     public void addMessageRecipient(MessageRecipient recipientToAdd) {
         messageRecipients.add(recipientToAdd);
     }

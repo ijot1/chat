@@ -61,4 +61,32 @@ public class RoomRepositoryTestSuite {
         roomRepository.deleteById(id1);
         roomRepository.deleteById(id2);
     }
+
+    @Test
+    public void testGetRoomById() {
+
+        //Given
+        Room room1 = Room.builder()
+                .roomsName("Silence Service")
+                .build();
+
+        Room room2 = Room.builder()
+                .roomsName("Java Talks")
+                .build();
+
+        //When
+        roomRepository.save(room1);
+        roomRepository.save(room2);
+        int count = roomRepository.findAll().size();
+        Long id1 = room1.getId();
+        Long id2 = room2.getId();
+        Room readRoom = roomRepository.findById(id2).orElse(new Room("No such room"));
+
+        //Then
+        Assert.assertEquals(room2, readRoom);
+
+        //CleanUp
+        roomRepository.deleteById(id1);
+        roomRepository.deleteById(id2);
+    }
 }

@@ -37,6 +37,10 @@ public class Room implements Serializable {
         }
     }
 
+    public Room(String roomsName) {
+        this.roomsName = roomsName;
+    }
+
     public void removeUserRoom(UserRoom userRoom) {
         Iterator<UserRoom> iterator = userRooms.iterator();
         while (iterator.hasNext()) {

@@ -1,6 +1,5 @@
 package com.messenger.chat.repository;
 
-import com.messenger.chat.domain.Message;
 import com.messenger.chat.domain.User;
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashSet;
 
 @RunWith(SpringRunner.class)
@@ -94,15 +92,6 @@ public class UserRepositoryTestSuite {
                 .friends(new HashSet<>())
                 .friendshipOwners(new HashSet<>())
                 .build();
-
-        user1.addFriend(user2);
-        user1.addFriend(user3);
-
-        user2.addFriend(user3);
-        user2.addFriend(user1);
-
-        user3.addFriend(user1);
-        user3.addFriend(user2);
 
         //When
         Long id1 = userRepository.save(user1).getId();
@@ -204,7 +193,7 @@ public class UserRepositoryTestSuite {
     }
 
     @Test
-    public void testfindByLoggedInTrue() {
+    public void testFindByLoggedInTrue() {
 
         //Given
         User user1 = User.builder()
@@ -253,4 +242,68 @@ public class UserRepositoryTestSuite {
         }
     }
 
+    @Test
+    public void testGetUserById() {
+        //Given
+        User user1 = User.builder()
+                .nick("ij")
+                .name("Irena-Janik")
+                .sex('W')
+                .location("Bangalore")
+                .createdOn(LocalDate.now())
+                .password("Zaq12wsx")
+                .loggedIn(true)
+                .messages(new HashSet<>())
+                .messageRecipients(new HashSet<>())
+                .friends(new HashSet<>())
+                .friendshipOwners(new HashSet<>())
+                .build();
+
+        User user2 = User.builder()
+                .nick("jk")
+                .name("Janina-Kranik")
+                .sex('W')
+                .location("Bialsk Podlaski")
+                .createdOn(LocalDate.now())
+                .password("Zaq12wsx")
+                .loggedIn(true)
+                .messages(new HashSet<>())
+                .messageRecipients(new HashSet<>())
+                .friends(new HashSet<>())
+                .friendshipOwners(new HashSet<>())
+                .build();
+
+        User user3 = User.builder()
+                .nick("kk")
+                .name("Karina-Kranik")
+                .sex('W')
+                .location("Rytro")
+                .createdOn(LocalDate.now())
+                .password("Zaq12wsx")
+                .loggedIn(true)
+                .messages(new HashSet<>())
+                .messageRecipients(new HashSet<>())
+                .friends(new HashSet<>())
+                .friendshipOwners(new HashSet<>())
+                .build();
+
+        //When
+        Long id1 = userRepository.save(user1).getId();
+        Long id2 = userRepository.save(user2).getId();
+        Long id3 = userRepository.save(user3).getId();
+
+        String str = userRepository.findById(id3).orElse(new User("No such user")).getNick();
+
+        //Then
+        Assert.assertEquals("kk", str);
+
+        //CleanUp
+        try {
+            userRepository.deleteById(id1);
+            userRepository.deleteById(id2);
+            userRepository.deleteById(id3);
+        } catch (Exception e) {
+            //
+        }
+    }
 }

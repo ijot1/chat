@@ -1,5 +1,6 @@
 package com.messenger.chat.service;
 
+import com.messenger.chat.domain.Message;
 import com.messenger.chat.domain.MessageDto;
 import com.messenger.chat.mapper.MessageMapper;
 import com.messenger.chat.repository.MessageRepository;
@@ -31,4 +32,6 @@ public class MessageService {
     public void deleteMessage(Long id) {
         messageRepository.deleteById(id);
     }
+
+    public Message saveMessage(Message message) { return messageRepository.save(message); }
 }

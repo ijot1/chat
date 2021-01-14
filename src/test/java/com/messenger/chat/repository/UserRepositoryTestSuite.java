@@ -228,7 +228,7 @@ public class UserRepositoryTestSuite {
         Long id1 = userRepository.save(user1).getId();
         Long id2 = userRepository.save(user2).getId();
 
-        int count = userRepository.findByLoggedInTrue(true).size();
+        int count = userRepository.findByLoggedInTrue().size();
 
         //Then
         Assert.assertEquals(1, count);

@@ -3,6 +3,7 @@ package com.messenger.chat.repository;
 import com.messenger.chat.domain.*;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,48 @@ public class MessageRecipientRepositoryTestSuite {
     @Autowired
     UserRoomRepository userRoomRepository;
 
+    @Before
+    public void testPrepareMessageRecipientRepositoryTestSuite() {
+        User user1 = User.builder()
+                .nick("ij")
+                .name("Irena-Janik")
+                .sex('W')
+                .location("Bangalore")
+                .createdOn(LocalDate.now())
+                .password("Zaq12wsx")
+                .loggedIn(true)
+                .messages(new HashSet<>())
+                .messageRecipients(new HashSet<>())
+                .friends(new HashSet<>())
+                .friendshipOwners(new HashSet<>())
+                .build();
+
+        User user2 = User.builder()
+                .nick("jk")
+                .name("Janina-Kranik")
+                .sex('W')
+                .location("Bialsk Podlaski")
+                .createdOn(LocalDate.now())
+                .password("Zaq12wsx")
+                .loggedIn(true)
+                .messages(new HashSet<>())
+                .messageRecipients(new HashSet<>())
+                .friends(new HashSet<>())
+                .friendshipOwners(new HashSet<>())
+                .build();
+
+        Room room = Room.builder()
+                .id(null)
+                .roomsName("Silence Service")
+                .userRooms(new ArrayList<>())
+                .build();
+
+        userRepository.save(user1);
+        userRepository.save(user2);
+
+        roomRepository.save(room);
+    }
+
     @Test
     public void testGetMessageRecipientUser() {
         //Given
@@ -47,9 +90,7 @@ public class MessageRecipientRepositoryTestSuite {
                 .messageRecipientSet(new HashSet<>())
                 .build();
 
-        System.out.println("messageId " + message.getId());
-
-        User user1 = User.builder()
+        /*User user1 = User.builder()
                 .nick("ij")
                 .name("Irena-Janik")
                 .sex('W')
@@ -57,14 +98,11 @@ public class MessageRecipientRepositoryTestSuite {
                 .createdOn(LocalDate.now())
                 .password("Zaq12wsx")
                 .loggedIn(true)
-//                .userRoomId(null)
                 .messages(new HashSet<>())
                 .messageRecipients(new HashSet<>())
                 .friends(new HashSet<>())
                 .friendshipOwners(new HashSet<>())
                 .build();
-
-        System.out.println("user1Id " + user1.getId());
 
         User user2 = User.builder()
                 .nick("jk")
@@ -74,48 +112,57 @@ public class MessageRecipientRepositoryTestSuite {
                 .createdOn(LocalDate.now())
                 .password("Zaq12wsx")
                 .loggedIn(true)
-//                .userRoomId(null)
                 .messages(new HashSet<>())
                 .messageRecipients(new HashSet<>())
                 .friends(new HashSet<>())
                 .friendshipOwners(new HashSet<>())
-                .build();
-
-        System.out.println("user2Id " + user2.getId());
+                .build();*/
 
         MessageRecipient messageRecipient = MessageRecipient.builder()
                 .addedBy("")
                 .addedOn(LocalDate.now())
-                .message(message)
+                .message(null)
                 .userRoom(null)
                 .user(null)
                 .build();
 
+        Room room = (Room)roomRepository.findAll().toArray()[0];
+
+        User user1 = (User) userRepository.findAll().toArray()[0];
+        User user2 = (User) userRepository.findAll().toArray()[1];
+
         user1.addMessage(message);
-        user1.addMessageRecipient(messageRecipient);
-        user1.addFriend(user2);
 
         message.setCreator(user1);
-        message.getMessageRecipientSet().add(messageRecipient);
 
-        messageRecipient.setMessage(message);
         messageRecipient.setUser(user2);
+        messageRecipient.setMessage(message);
         messageRecipient.setAddedBy(user1.getNick());
+
+        user1.addMessageRecipient(messageRecipient);
+        user1.getFriends().add(user2);
+
+        message.getMessageRecipientSet().add(messageRecipient);
 
         //When
 
+        messageRepository.save(message);
         userRepository.save(user1);
         userRepository.save(user2);
-        messageRepository.save(message);
         messageRecipientRepository.save(messageRecipient);
 
-        int count = messageRecipientRepository.findAll().size();
+        Long recipientId = messageRecipient.getId();
+
+        String addedByNick = messageRecipientRepository.findById(recipientId).orElse(new MessageRecipient("No one")).getAddedBy();
 
         //Then
-        Assert.assertEquals(1, count);
+        Assert.assertEquals("ij", addedByNick);
 
         //Clean up
-//        messageRecipientRepository.delete(messageRecipient);
+        messageRecipientRepository.delete(messageRecipient);
+        userRepository.delete(user1);
+        userRepository.delete(user2);
+        roomRepository.delete(room);
     }
 
     @Test
@@ -176,7 +223,7 @@ public class MessageRecipientRepositoryTestSuite {
         Room room = Room.builder()
                 .id(null)
                 .roomsName("Silence Service")
-//                .userRooms(null)
+                .userRooms(new ArrayList<>())
                 .build();
 
 

@@ -1,10 +1,12 @@
 package com.messenger.chat.controller;
 
+import com.messenger.chat.domain.Message;
 import com.messenger.chat.domain.MessageDto;
 import com.messenger.chat.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -24,7 +26,10 @@ public class MessageController {
     }
 
     @DeleteMapping(value = "deleteMessage")
-    public void deletsMessage(@RequestParam Long messageId) {
+    public void deleteMessage(@RequestParam Long messageId) {
         messageService.deleteMessage(messageId);
     }
+
+    @PostMapping(value = "saveMessage")
+    public Message createMessage(@Valid @RequestBody Message message) { return messageService.saveMessage(message); }
 }

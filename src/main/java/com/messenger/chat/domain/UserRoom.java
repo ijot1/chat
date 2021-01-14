@@ -33,7 +33,7 @@ public class UserRoom implements Serializable {
     private User user;
 
     @MapsId("ROOM_ID")
-    @ManyToOne(cascade = CascadeType.PERSIST/*, fetch = FetchType.LAZY*/)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "ROOM_ID", insertable = false, updatable = false)
     private Room room;
 

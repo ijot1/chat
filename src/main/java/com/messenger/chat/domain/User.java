@@ -14,6 +14,9 @@ import java.util.*;
 @Getter
 @Setter
 @Builder
+@NamedQuery(name = "User.retrieveLoggedInUsers",
+        query = "FROM User WHERE loggedIn = true"
+)
 @Entity
 @Table(name = "USERS")
 public class User implements Serializable {
@@ -44,17 +47,19 @@ public class User implements Serializable {
     @Column(name = "LOGGED_IN")
     private boolean loggedIn;
 
-    @OneToMany(targetEntity = Message.class,
-            mappedBy = "creator",
+    @OneToMany(mappedBy = "creator",
             fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     private Set<Message> messages = new HashSet<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            orphanRemoval = true)
     private Set<MessageRecipient> messageRecipients = new HashSet<>();
 
-    @ManyToMany(cascade = CascadeType.PERSIST)  //or CascadeType.MERGE
+    @ManyToMany(cascade = CascadeType.PERSIST)
     private Set<User> friends = new HashSet<>();
 
     @ManyToMany(mappedBy = "friends")
@@ -79,8 +84,8 @@ public class User implements Serializable {
     }
 
     public void addFriend(User friend) {
-        friendshipOwners.add(this);
-        friends.add(friend);
+        this.getFriendshipOwners().add(this);
+        this.getFriends().add(friend);
     }
 
     public void removeFriend(User friendToRemove) {
@@ -95,12 +100,12 @@ public class User implements Serializable {
     }
 
     public void addMessage(Message message) {
-        this.messages.add(message);
+        this.getMessages().add(message);
         message.setCreator(this);
     }
 
     public void removeMessage(Message message) {
-        this.messages.remove(message);
+        this.getMessages().remove(message);
         message.setCreator(null);
     }
 

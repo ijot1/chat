@@ -30,12 +30,12 @@ public class Message implements Serializable {
     private LocalDate dateCreated;
 
     @ManyToOne(targetEntity = User.class,
-            cascade = CascadeType.PERSIST,      //!?
-            fetch = FetchType.LAZY)
+            cascade = CascadeType.PERSIST,     //MERGE
+            fetch = FetchType.LAZY)            //default for ToOne EAGER
     @JoinColumn(name = "CREATED_BY")
     private User creator;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true) //EAGER
     @JoinColumn(name = "MESSAGE_ID",
             /*nullable = false,*/ insertable = false, updatable = false
     )

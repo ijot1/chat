@@ -1,6 +1,7 @@
 package com.messenger.chat.repository;
 
 import com.messenger.chat.domain.*;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +31,7 @@ public class UserRoomRepositoryTestSuite {
     MessageRecipientRepository messageRecipientRepository;
 
     @Before
-    public void testPrepareUsersAndRooms() {
+    public void testPrepareUserRoomRepositoryTestSuite() {
         User user1 = User.builder()
                 .id(null)
                 .nick("ij")
@@ -89,6 +90,25 @@ public class UserRoomRepositoryTestSuite {
         roomRepository.save(room);
     }
 
+    @After
+    public void testCleanUpAfterExecution() {
+        Room r = (Room)roomRepository.findAll().toArray()[0];
+        Long idx = r.getId();
+
+        User user1 = (User) userRepository.findAll().toArray()[0];
+        User user2 = (User) userRepository.findAll().toArray()[1];
+        User user3 = (User) userRepository.findAll().toArray()[2];
+
+        try {
+            roomRepository.deleteById(idx);
+            userRepository.delete(user1);
+            userRepository.delete(user2);
+            userRepository.delete(user3);
+        } catch (Exception e) {
+            //
+        }
+    }
+
     @Test
     public void testGetAllUsersRooms() {
         //Given
@@ -111,20 +131,8 @@ public class UserRoomRepositoryTestSuite {
 
         int count = userRoomRepository.findAll().size();
 
-        Long idx = room.getId();
-
         //Then
         Assert.assertEquals(3, count);
-
-        //Clean up
-        try {
-            roomRepository.deleteById(idx);
-            userRepository.delete(user1);
-            userRepository.delete(user2);
-            userRepository.delete(user3);
-        } catch (Exception e) {
-            //
-        }
     }
 
     @Test
@@ -147,16 +155,6 @@ public class UserRoomRepositoryTestSuite {
 
         //Then
         Assert.assertEquals(savedUserRoom, readUserRoom);
-
-        //Clean up
-        try {
-            roomRepository.deleteById(idx);
-            userRepository.delete(user1);
-            userRepository.delete(user2);
-            userRepository.delete(user3);
-        } catch (Exception e) {
-            //
-        }
     }
 
     @Test
@@ -179,16 +177,6 @@ public class UserRoomRepositoryTestSuite {
 
         //Then
         Assert.assertEquals(toSaveUserRoom, readUserRoom);
-
-        //Clean up
-        try {
-            roomRepository.deleteById(idx);
-            userRepository.delete(user1);
-            userRepository.delete(user2);
-            userRepository.delete(user3);
-        } catch (Exception e) {
-            //
-        }
     }
 
     @Test
@@ -219,15 +207,5 @@ public class UserRoomRepositoryTestSuite {
 
         //Then
         Assert.assertEquals(2, count);
-
-        //Clean up
-        try {
-            roomRepository.deleteById(idx);
-            userRepository.delete(user1);
-            userRepository.delete(user2);
-            userRepository.delete(user3);
-        } catch (Exception e) {
-            //
-        }
     }
 }

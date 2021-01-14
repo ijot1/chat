@@ -33,7 +33,7 @@ public class MessageRecipient {
     private Message message;
 
 
-    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)    //?cascade = CascadeType.MERGE
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
 //    @JoinColumn(name = "MESSAGE_RECIPIENT_ID", insertable = false, updatable = false)
     @JoinColumns({
             @JoinColumn(name = "user", referencedColumnName = "USER_ID", insertable = false, updatable = false),
@@ -55,6 +55,10 @@ public class MessageRecipient {
                 ", userRoom=" + userRoom +
                 ", user=" + user +
                 '}';
+    }
+
+    public MessageRecipient(String addedBy) {
+        this.addedBy = addedBy;
     }
 
     @Override

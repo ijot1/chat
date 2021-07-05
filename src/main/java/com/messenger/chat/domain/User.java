@@ -1,12 +1,15 @@
 package com.messenger.chat.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.Set;
 
 
 @NoArgsConstructor
@@ -14,10 +17,25 @@ import java.util.*;
 @Getter
 @Setter
 @Builder
-@NamedQuery(name = "User.retrieveLoggedInUsers",
-        query = "FROM User WHERE loggedIn = true"
-)
 @Entity
+@NamedNativeQueries({
+        @NamedNativeQuery(
+                name = "User.findFriends",
+                query = "select f.* from users_friends uf, users u, users f " +
+                        "where uf.user_id = u.user_id and uf.friend_id = f.user_id " +
+                        "and u.user_id = :id",  //and u.user_id = :id
+                resultClass = User.class),
+        @NamedNativeQuery(
+                name = "User.addUsersFriend",
+                query = "insert into users_friends (user_id, friend_id) values (:userId, :friendId)",   //values (:userId, :friendId)
+                resultClass = User.class),
+        @NamedNativeQuery(
+                name = "User.deleteUsersFriend",
+                query = "delete from users_friends where friend_id = :friendId and user_id = :userId",  //where friend_id = :friendId and user_id = :userId
+                resultClass = User.class)
+})
+
+//@JsonIgnoreProperties(value = {"messages", "recipients", "friends", "senders"})
 @Table(name = "USERS")
 public class User implements Serializable {
 
@@ -39,7 +57,7 @@ public class User implements Serializable {
     private String location;
 
     @Column(name = "CREATED_ON")
-    private LocalDate createdOn;
+    private LocalDate createdOn = LocalDate.now();
 
     @Column(name = "PASSWORD", nullable = false)
     private String password;
@@ -51,62 +69,107 @@ public class User implements Serializable {
             fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
             orphanRemoval = true)
-    private Set<Message> messages = new HashSet<>();
+    @JsonIgnore
+    private Set<Message> messages;
 
     @OneToMany(mappedBy = "user",
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,
             orphanRemoval = true)
-    private Set<MessageRecipient> messageRecipients = new HashSet<>();
+    @JsonIgnore
+    private Set<Recipient> recipients;
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "user",
+            cascade = {CascadeType.ALL},
+            orphanRemoval = true)
+    private Set<UserRoom> userRooms = new HashSet<>();
+
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JsonIgnore
+    @JoinTable(name = "users_friends",
+            joinColumns = {@JoinColumn(name = "USER_ID")},
+            inverseJoinColumns = {@JoinColumn(name = "FRIEND_ID")})
     private Set<User> friends = new HashSet<>();
-
-    @ManyToMany(mappedBy = "friends")
-    private Set<User> friendshipOwners = new HashSet<>();
 
     public User(String nick) {
         this.nick = nick;
     }
 
-    public void addMessageRecipient(MessageRecipient recipientToAdd) {
-        messageRecipients.add(recipientToAdd);
+    public void addMessage(Message message) {
+        addMessage(message, true);
     }
 
-    public void removeMessageRecipient(MessageRecipient recipientToRemove) {
-        Iterator<MessageRecipient> i = messageRecipients.iterator();
+    void addMessage(Message message, boolean set) {
+        if (message != null && !getMessages().contains(message)) {
+            getMessages().add(message);
+        }
+        if (set) {
+            message.setCreator(this, false);
+        }
+    }
+
+    public void removeMessage(Message message) {
+        messages.remove(message);
+        message.setCreator(null);
+    }
+
+    public void addRecipient(Recipient recipient) {
+        addRecipient(recipient, true);
+    }
+
+    void addRecipient(Recipient recipientToAdd, boolean set) {
+        if (recipientToAdd != null && !getRecipients().contains(recipientToAdd)) {
+            getRecipients().add(recipientToAdd);
+            if (set) {
+                recipientToAdd.setUser(this, false);
+            }
+        }
+    }
+
+    public void removeRecipient(Recipient recipientToRemove) {
+        Iterator<Recipient> i = recipients.iterator();
         while (i.hasNext()) {
-            MessageRecipient mr = (MessageRecipient) i.next();
+            Recipient mr = i.next();
             if (mr.equals(recipientToRemove)) {
                 i.remove();
+                recipientToRemove.setUser(null);
+            }
+        }
+    }
+
+    public void addRoom(Room room) {
+        UserRoom userRoom = new UserRoom(this, room);
+        if (!userRooms.contains(userRoom)) {
+            userRooms.add(userRoom);
+            room.getUserRooms().add(userRoom);
+        }
+    }
+
+    public void removeRoom(Room room) {
+        Iterator<UserRoom> iterator = userRooms.iterator();
+        while (iterator.hasNext()) {
+            UserRoom ur = iterator.next();
+            if (ur.getRoom().equals(room) && ur.getUser().equals(this)) {
+                iterator.remove();
+                ur.getRoom().getUserRooms().remove(ur);
+                ur.setUser(null);
+                ur.setRoom(null);
             }
         }
     }
 
     public void addFriend(User friend) {
-        this.getFriendshipOwners().add(this);
-        this.getFriends().add(friend);
+        this.friends.add(friend);
     }
 
     public void removeFriend(User friendToRemove) {
         Iterator<User> i = friends.iterator();
         while (i.hasNext()) {
             User u = (User) i.next();
-            i.remove();
+            if (u == friendToRemove) {
+                i.remove();
+            }
         }
-        if (friends.size() == 0) {
-            friendshipOwners.remove(this);
-        }
-    }
-
-    public void addMessage(Message message) {
-        this.getMessages().add(message);
-        message.setCreator(this);
-    }
-
-    public void removeMessage(Message message) {
-        this.getMessages().remove(message);
-        message.setCreator(null);
     }
 
     @Override
@@ -117,7 +180,6 @@ public class User implements Serializable {
                 ", name='" + name + '\'' +
                 ", sex=" + sex +
                 ", loggedIn=" + loggedIn +
-                ", messageRecipients=" + messageRecipients +
                 '}';
     }
 
@@ -135,6 +197,6 @@ public class User implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, nick, name, sex, location);
+        return Objects.hash(nick, name, sex, location);
     }
 }

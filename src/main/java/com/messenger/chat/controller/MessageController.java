@@ -2,34 +2,49 @@ package com.messenger.chat.controller;
 
 import com.messenger.chat.domain.Message;
 import com.messenger.chat.domain.MessageDto;
+import com.messenger.chat.domain.User;
+import com.messenger.chat.mapper.MessageMapper;
 import com.messenger.chat.service.MessageService;
+import com.messenger.chat.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
 
+@CrossOrigin("*")
 @RestController
-@RequestMapping("v1/chat")
+@RequestMapping("/v1/chat")
 public class MessageController {
     @Autowired
     MessageService messageService;
 
-    @GetMapping(value = "getMessages")
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    MessageMapper messageMapper;
+
+    @GetMapping(value = "/messages")
     public List<MessageDto> getMessages() {
-        return messageService.getMessages();
+        return messageMapper.mapToMessageDtoList(messageService.retrieveMessages());
     }
 
-    @GetMapping(value = "getMessage")
-    public MessageDto getMessage(@RequestParam Long messageId) {
-        return messageService.getMessageById(messageId);
+    @GetMapping(value = "/messages/{messageId}")
+    public MessageDto getMessage(@PathVariable Long messageId) {
+        return messageMapper.mapToMessageDto(messageService.retrieveMessageById(messageId));
     }
 
-    @DeleteMapping(value = "deleteMessage")
-    public void deleteMessage(@RequestParam Long messageId) {
-        messageService.deleteMessage(messageId);
+    @PostMapping(value = "/messages")
+    public MessageDto createMessage(@RequestBody MessageDto messageDto) {
+        User creator = userService.retrieveUserById(messageDto.getCreatorId());
+        return messageMapper.mapToMessageDto(messageService.saveMessage(messageMapper.mapToMessage(messageDto, creator)));
     }
 
-    @PostMapping(value = "saveMessage")
-    public Message createMessage(@Valid @RequestBody Message message) { return messageService.saveMessage(message); }
+    //updateMessage()
+
+    @DeleteMapping(value = "/messages/{messageId}")
+    public void deleteMessage(@PathVariable Long messageId) {
+        messageService.deleteMessageById(messageId);
+    }
 }

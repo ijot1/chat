@@ -5,11 +5,13 @@ import lombok.*;
 
 import java.time.LocalDate;
 
-@Data
 @AllArgsConstructor
+@NoArgsConstructor
+@Data
 @Builder
 public class MessageDto {
     private Long id;
     private String messageText;
     private LocalDate dateCreated;
+    private Long creatorId;
 }

@@ -9,27 +9,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RoomService {
-    private RoomRepository roomRepository;
-    private RoomMapper roomMapper;
-
     @Autowired
-    public RoomService(RoomRepository roomRepository, RoomMapper roomMapper) {
-        this.roomRepository = roomRepository;
-        this.roomMapper = roomMapper;
+    private RoomRepository roomRepository;
+
+    public List<Room> retrieveRooms() {
+        return roomRepository.findAll();
     }
 
-    public List<RoomDto> getRooms() {
-        return roomMapper.mapToRoomDtoList(roomRepository.findAll());
+    public Room retrieveRoomById(final Long id) throws EntityNotFoundException {
+        return roomRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Room.class, id));
     }
 
-    public RoomDto getRoomById(final Long id) {
-        return roomMapper.mapToRoomDto(roomRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Room.class, id)));
+    public Room saveRoom(Room room) {
+        return roomRepository.save(room);
     }
 
-    public void deleteRoom(Long id) {
+    public void deleteRoomById(Long id) {
         roomRepository.deleteById(id);
     }
 }

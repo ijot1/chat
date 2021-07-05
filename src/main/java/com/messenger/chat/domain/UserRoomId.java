@@ -22,7 +22,7 @@ public class UserRoomId implements Serializable {
     protected Long roomId;
 
     @Override
-    public String toString() {
+    public String   toString() {
         return "UserRoomId{" +
                 "userId=" + userId +
                 ", roomId=" + roomId +

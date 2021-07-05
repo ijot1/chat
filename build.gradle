@@ -7,7 +7,6 @@ plugins {
 
 group = 'com.messenger'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '1.8'
 
 configurations {
     compileOnly {
@@ -22,11 +21,20 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-    implementation('mysql:mysql-connector-java:8.0.19')
+    implementation('mysql:mysql-connector-java:8.0.24')
+    // https://mvnrepository.com/artifact/org.hibernate/hibernate-gradle-plugin
+    implementation group: 'org.hibernate', name: 'hibernate-gradle-plugin', version: '5.4.31.Final'
+
+    // https://mvnrepository.com/artifact/org.hibernate/hibernate-core
+    implementation group: 'org.hibernate', name: 'hibernate-core', version: '5.4.31.Final'
+
+    // https://mvnrepository.com/artifact/org.hibernate/hibernate-entitymanager
+    implementation group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.4.31.Final'
 
     runtimeOnly'com.h2database:h2'
 
@@ -35,9 +43,7 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     implementation 'junit:junit:4.12'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+
 }
 
 test {

@@ -1,6 +1,10 @@
 package com.messenger.chat.domain;
 
 import lombok.*;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.NaturalIdCache;
+import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -21,43 +25,23 @@ public class Room implements Serializable {
     private Long id;
 
     @Column(name = "ROOMS_NAME")
-    private String roomsName;
+    private String name;
 
-    @OneToMany(mappedBy = "room", cascade = CascadeType.MERGE, fetch = FetchType.EAGER, orphanRemoval = true)
-    private List<UserRoom> userRooms = new ArrayList<>();
+    @OneToMany(mappedBy = "room",
+            cascade = {CascadeType.ALL},   //ALL
+            orphanRemoval = true)
+    private Set<UserRoom> userRooms = new HashSet<>();
 
-    public void addUserRoom(User user) {
-        if (user != null) {
-            UserRoom userRoom = new UserRoom(user, this);
-            if (getUserRooms().contains(userRoom)) {
-                getUserRooms().set(getUserRooms().indexOf(userRoom), userRoom);
-            } else {
-                userRooms.add(userRoom);
-            }
-        }
-    }
-
-    public Room(String roomsName) {
-        this.roomsName = roomsName;
-    }
-
-    public void removeUserRoom(UserRoom userRoom) {
-        Iterator<UserRoom> iterator = userRooms.iterator();
-        while (iterator.hasNext()) {
-            UserRoom ur = (UserRoom) iterator.next();
-            if (ur.equals(userRoom) && ur.getRoom().equals(this))
-                iterator.remove();
-            ur.setUser(null);
-            ur.setRoom(null);
-        }
+    public Room(String name) {
+        this.name = name;
     }
 
     @Override
     public String toString() {
         return "Room{" +
                 "id=" + id +
-                ", roomsName='" + roomsName + '\'' +
-                ", userRooms=" + userRooms +
+                ", roomsName='" + name + '\'' +
+//                ", userRoomSet=" + userRoomSet +
                 '}';
     }
 
@@ -67,11 +51,11 @@ public class Room implements Serializable {
         if (o == null || !(o instanceof Room)) return false;
 
         final Room room = (Room) o;
-        return Objects.equals(roomsName, room.roomsName);
+            return Objects.equals(getName(), room.getName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(roomsName);
+        return Objects.hash(getName());
     }
 }

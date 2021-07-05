@@ -3,9 +3,9 @@ package com.messenger.chat.domain;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -30,29 +30,53 @@ public class Message implements Serializable {
     private LocalDate dateCreated;
 
     @ManyToOne(targetEntity = User.class,
-            cascade = CascadeType.PERSIST,     //MERGE
+            cascade = CascadeType.PERSIST,
             fetch = FetchType.LAZY)            //default for ToOne EAGER
+    @NotNull
     @JoinColumn(name = "CREATED_BY")
     private User creator;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true) //EAGER
-    @JoinColumn(name = "MESSAGE_ID",
-            /*nullable = false,*/ insertable = false, updatable = false
-    )
-    private Set<MessageRecipient> messageRecipientSet = new HashSet<>();
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    /*@JoinColumn(name = "MESSAGE_ID",    //"MESSAGE_ID"
+            insertable = false,
+            updatable = false
+    )*/
+    private Set<Recipient> recipientSet;
 
     public Message(String messageText) {
         this.messageText = messageText;
     }
 
-    public void addMessageRecipient(MessageRecipient messageRecipient) {
-        this.messageRecipientSet.add(messageRecipient);
-        messageRecipient.setMessage(this);
+    public void setCreator(User creator) {
+        setCreator(creator, true);
     }
 
-    public void deleteMessageRecipient(MessageRecipient messageRecipient) {
-        messageRecipientSet.remove(messageRecipient);
-        messageRecipient.setMessage(null);
+    void setCreator(User creator, boolean add) {
+        this.creator = creator;
+        if (creator != null && add) {
+            creator.addMessage(this, false);
+        }
+    }
+
+    public void addMessageRecipient(Recipient recipient) {
+        this.recipientSet.add(recipient);
+        recipient.setMessage(this);
+    }
+
+    public void deleteMessageRecipient(Recipient recipient) {
+        recipientSet.remove(recipient);
+        recipient.setMessage(null);
+    }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "id=" + id +
+                ", messageText='" + messageText + '\'' +
+                ", dateCreated=" + dateCreated +
+                ", creator=" + creator +
+                ", recipientSet=" + recipientSet +
+                '}';
     }
 
     @Override

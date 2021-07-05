@@ -1,6 +1,5 @@
 package com.messenger.chat.controller;
 
-import com.messenger.chat.domain.Room;
 import com.messenger.chat.domain.RoomDto;
 import com.messenger.chat.mapper.RoomMapper;
 import com.messenger.chat.service.RoomService;
@@ -9,26 +8,34 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin("*")
 @RestController
-@RequestMapping("v1/chat")
+@RequestMapping("/v1/chat")
 public class RoomController {
     @Autowired
     private RoomService roomService;
     @Autowired
     private RoomMapper roomMapper;
 
-    @GetMapping(value = "getRooms")
+    @GetMapping(value = "/rooms")
     public List<RoomDto> getRooms() {
-        return roomService.getRooms();
+        return roomMapper.mapToRoomDtoList(roomService.retrieveRooms());
     }
 
-    @GetMapping(value = "getRoom")
-    public RoomDto getRoom(@RequestParam Long roomId) {
-        return roomService.getRoomById(roomId);
+    @GetMapping(value = "/rooms/{roomId}")
+    public RoomDto getRoom(@PathVariable Long roomId) {
+        return roomMapper.mapToRoomDto(roomService.retrieveRoomById(roomId));
     }
 
-    @DeleteMapping(value = "deleteRoom")
-    public void deleteRoom(@RequestParam Long roomId) {
-        roomService.deleteRoom(roomId);
+    @PostMapping(value = "/rooms")
+    public void createRoom(@RequestBody RoomDto roomDto) {
+        roomService.saveRoom(roomMapper.mapToRoom(roomDto));
+    }
+
+    //updateRoom()
+
+    @DeleteMapping(value = "/rooms/{roomId}")
+    public void deleteRoom(@PathVariable Long roomId) {
+        roomService.deleteRoomById(roomId);
     }
 }

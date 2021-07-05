@@ -1,7 +1,7 @@
 package com.messenger.chat.domain;
 
 import lombok.*;
-import org.springframework.transaction.annotation.Transactional;
+import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -16,57 +16,56 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder
-@Entity
+@Entity(name = "UserRoom")
 @Table(name = "USERS_ROOMS")
 public class UserRoom implements Serializable {
 
     @EmbeddedId
-    private UserRoomId userRoomId = new UserRoomId();
-
-    @Column(updatable = false)
-    @NotNull
-    private LocalDate addedOn;
+    private UserRoomId id;
 
     @MapsId("USER_ID")
-    @ManyToOne   //default for ToOne is EAGER
+    @ManyToOne  //FetchType.LAZY
     @JoinColumn(name = "USER_ID", insertable = false, updatable = false)
     private User user;
 
     @MapsId("ROOM_ID")
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne  //FetchType.LAZY
     @JoinColumn(name = "ROOM_ID", insertable = false, updatable = false)
     private Room room;
 
+    @Column(name = "ADDED_ON", updatable = false)
+//    @NotNull
+    private LocalDate addedOn;
+
     @OneToMany(mappedBy = "userRoom", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MessageRecipient> messageRecipients;
+    private Set<Recipient> recipients;
 
     public UserRoom(User user, Room room) {
-        this.addedOn = LocalDate.now();
         this.user = user;
         this.room = room;
-        this.userRoomId.userId = user.getId();
-        this.userRoomId.roomId = room.getId();
-        this.messageRecipients = new HashSet<>();
+        this.addedOn = LocalDate.now();
+        this.recipients = new HashSet<>();
+        this.id = new UserRoomId(user.getId(), room.getId());
     }
 
-    public void addUMessageRecipient(UserRoom userRoom) {
-        MessageRecipient messageRecipient = new MessageRecipient();
-        messageRecipient.setUserRoom(this);
-        this.messageRecipients.add(messageRecipient);
+    public void addMessageRecipient(UserRoom userRoom) {
+        Recipient recipient = new Recipient();
+        recipient.setUserRoom(this);
+        this.recipients.add(recipient);
     }
 
-    public void removeMessageRecipient(MessageRecipient messageRecipient) {
-        this.messageRecipients.remove(messageRecipient);
+    public void removeMessageRecipient(Recipient recipient) {
+        this.recipients.remove(recipient);
     }
 
     @Override
     public String toString() {
         return "UserRoom{" +
-                "userRoomId=" + userRoomId +
+                "userRoomId=" + id +
                 ", addedOn=" + addedOn +
                 ", user=" + user +
                 ", room=" + room +
-                ", messageRecipients=" + messageRecipients +
+                /*", messageRecipients=" + recipients +*/
                 '}';
     }
 
@@ -83,6 +82,5 @@ public class UserRoom implements Serializable {
     public int hashCode() {
         return Objects.hash(user, room);
     }
-
 
 }

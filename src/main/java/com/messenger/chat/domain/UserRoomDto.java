@@ -1,12 +1,14 @@
 package com.messenger.chat.domain;
 
-import lombok.Data;
-import lombok.Builder;
+import lombok.*;
 
-import lombok.NoArgsConstructor;
+import java.time.LocalDate;
 
-@Data
+@AllArgsConstructor
 @NoArgsConstructor
+@Getter
 @Builder
 public class UserRoomDto {
+    private UserRoomId userRoomId;
+    private LocalDate addedOn;
 }

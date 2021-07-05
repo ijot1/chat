@@ -20,12 +20,12 @@ public class RoomRepositoryTestSuite {
 
         //Given
         Room room = Room.builder()
-                .roomsName("Silence Service")
+                .name("Silence Service")
                 .build();
 
         //When
         Room r = roomRepository.save(room);
-        String str = r.getRoomsName();
+        String str = r.getName();
         Long id1 = r.getId();
 
         //Then
@@ -36,15 +36,15 @@ public class RoomRepositoryTestSuite {
     }
 
     @Test
-    public void testGetRooms() {
+    public void testFindRooms() {
 
         //Given
         Room room1 = Room.builder()
-                .roomsName("Silence Service")
+                .name("Silence Service")
                 .build();
 
         Room room2 = Room.builder()
-                .roomsName("Java Talks")
+                .name("Java Talks")
                 .build();
 
         //When
@@ -63,15 +63,15 @@ public class RoomRepositoryTestSuite {
     }
 
     @Test
-    public void testGetRoomById() {
+    public void testFindRoomById() {
 
         //Given
         Room room1 = Room.builder()
-                .roomsName("Silence Service")
+                .name("Silence Service")
                 .build();
 
         Room room2 = Room.builder()
-                .roomsName("Java Talks")
+                .name("Java Talks")
                 .build();
 
         //When

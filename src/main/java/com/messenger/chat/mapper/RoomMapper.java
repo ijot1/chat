@@ -12,14 +12,14 @@ public class RoomMapper {
     public Room mapToRoom(final RoomDto roomDto) {
         return Room.builder()
                 .id(roomDto.getId())
-                .roomsName(roomDto.getRoomsName())
+                .name(roomDto.getRoomsName())
                 .build();
     }
 
     public RoomDto mapToRoomDto(final Room room) {
         return RoomDto.builder()
                 .id(room.getId())
-                .roomsName(room.getRoomsName())
+                .roomsName(room.getName())
                 .build();
     }
 

@@ -1,6 +1,7 @@
 package com.messenger.chat.repository;
 
 import com.messenger.chat.domain.Recipient;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -35,6 +36,7 @@ public interface RecipientRepository extends CrudRepository<Recipient, Long> {
     @Override
     Recipient save(Recipient recipient);
 
-    @Override
-    void deleteById(Long id);
+    @Modifying
+    @Query("delete from Recipient where id = :id")
+    void deleteById(@Param("id") Long id);
 }

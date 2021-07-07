@@ -47,7 +47,7 @@ public class RecipientRepositoryTestSuite {
     public static Long user2Id;
     public static Long user3Id;
 
-    public static Long roomId;
+//    public static Long roomId;
 
     public static Long message1Id;
     public static Long message2Id;
@@ -376,6 +376,8 @@ public class RecipientRepositoryTestSuite {
     @Test
     public void testFindAllRecipients() {
         //Given
+        //@Before prepared data
+
         //When
         int count = recipientRepository.findAll().size();
         //Then
@@ -386,6 +388,8 @@ public class RecipientRepositoryTestSuite {
     @Test
     public void testFindRecipientById() {
         //Given
+        //@Before prepared data
+
         //When
         Recipient recipient = recipientRepository.findById(recipient1Id).orElseThrow(() -> new EntityNotFoundException(Recipient.class, recipient1Id));
         String str = recipient.getUser().getName();
@@ -441,14 +445,10 @@ public class RecipientRepositoryTestSuite {
     @Test
     public void testDeleteRecipientById() {
         //Given
-        EntityManager em = emFactory.createEntityManager();
-
-        Recipient readRecipient = (Recipient) recipientRepository.findAll().toArray()[0];
-        em.getTransaction().begin();
+        //@Before prepared data
 
         //When
-        recipientRepository.deleteById(recipient1Id);
-
+        recipientRepository.deleteById(recipient2Id);
         int count = recipientRepository.findAll().size();
 
         //Then

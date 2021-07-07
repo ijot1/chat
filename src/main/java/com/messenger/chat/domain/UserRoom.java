@@ -34,7 +34,6 @@ public class UserRoom implements Serializable {
     private Room room;
 
     @Column(name = "ADDED_ON", updatable = false)
-//    @NotNull
     private LocalDate addedOn;
 
     @OneToMany(mappedBy = "userRoom", cascade = CascadeType.ALL, orphanRemoval = true)

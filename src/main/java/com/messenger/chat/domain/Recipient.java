@@ -19,7 +19,8 @@ import java.util.Objects;
 @Table(name = "RECIPIENTS")
 @NamedNativeQuery(
         name = "findRecipientByMessageIdAndUserIdOrUserRoomId",
-        query = "SELECT r.* FROM recipients r where r.message_id = :message_id and ((r.user_id = :user_id and r.id_room is null and r.id_user is null) or (r.id_room = :room_id and r.user_id is null))",
+        query = "SELECT r.* FROM recipients r where r.message_id = :message_id and ((r.user_id = :user_id and r.id_room is null or r.id_user is null) or (r.id_room = :room_id and r.user_id is null))",
+
         resultClass = Recipient.class
 )
 
@@ -34,12 +35,12 @@ public class Recipient {
     @NotNull
     private LocalDate addedOn;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)   //FetchType.LAZY
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)   //, fetch = FetchType.LAZY
     @JoinColumn(name = "MESSAGE_ID")
     private Message message;
 
     @Nullable
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)   //FetchType.LAZY
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)   //, fetch = FetchType.LAZY
     @JoinColumns({
             @JoinColumn(name = "id_user", referencedColumnName = "USER_ID"),
             @JoinColumn(name = "id_room", referencedColumnName = "ROOM_ID")
@@ -67,9 +68,9 @@ public class Recipient {
         return "Recipient{" +
                 "id=" + id +
                 ", addedOn=" + addedOn +
-                ", message=" + message +
+                /*", message=" + message +
                 ", userRoom=" + userRoom +
-                ", user=" + user +
+                ", user=" + user +*/
                 '}';
     }
 

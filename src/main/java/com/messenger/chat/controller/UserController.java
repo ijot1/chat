@@ -6,6 +6,7 @@ import com.messenger.chat.mapper.UserMapper;
 import com.messenger.chat.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import sun.management.snmp.jvminstr.JvmOSImpl;
 
 import java.util.List;
 
@@ -38,6 +39,16 @@ public class UserController {
     @GetMapping(value = "/users/{userId}")
     public UserDto getUser(@PathVariable Long userId) {
         return userMapper.mapToUserDto(userService.retrieveUserById(userId));
+    }
+
+    @PutMapping(value = "/users/{userId, friendId}")
+    public void addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+        userService.addSendersFriend(userId, friendId);
+    }
+
+    @DeleteMapping(value = "/users/{userId, friendId}")
+    public void deleteFriend(@PathVariable Long userId, @PathVariable Long friendId) {
+        userService.deleteSendersFriend(userId, friendId);
     }
 
     @PutMapping(value = "/users/{userId}")

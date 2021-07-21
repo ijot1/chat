@@ -1,15 +1,12 @@
 package com.messenger.chat.service;
 
-import com.messenger.chat.domain.EntityNotFoundException;
+import com.messenger.chat.exception.EntityNotFoundException;
 import com.messenger.chat.domain.Room;
-import com.messenger.chat.domain.RoomDto;
-import com.messenger.chat.mapper.RoomMapper;
 import com.messenger.chat.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class RoomService {

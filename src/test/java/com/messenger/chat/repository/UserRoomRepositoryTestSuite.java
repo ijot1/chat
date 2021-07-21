@@ -1,6 +1,7 @@
 package com.messenger.chat.repository;
 
 import com.messenger.chat.domain.*;
+import com.messenger.chat.exception.EntityNotFoundException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,7 +10,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -53,6 +53,7 @@ public class UserRoomRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -71,6 +72,7 @@ public class UserRoomRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -89,6 +91,7 @@ public class UserRoomRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -99,7 +102,7 @@ public class UserRoomRepositoryTestSuite {
         Room room = Room.builder()
                 .id(null)
                 .name("Silence Service")
-                .userRooms(new HashSet<>())
+                .roomUsersRooms(new HashSet<>())
                 .build();
 
         em.persist(room);
@@ -192,6 +195,20 @@ public class UserRoomRepositoryTestSuite {
 
         //Then
         Assert.assertEquals("Irena-Janik", userRoomUserName);
+    }
+
+    @Test
+    public void testfindUsersRoomsByRoomId() {
+        //Given
+        //@Before prepared data
+        UserRoom userRoom = (UserRoom)userRoomRepository.findAll().toArray()[0];
+        Long roomId = userRoom.getRoom().getId();
+
+        //When
+        int count = userRoomRepository.findByRoomId(roomId).size();
+
+        //Then
+        Assert.assertEquals(3, count);
     }
 
     @Test

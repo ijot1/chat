@@ -1,17 +1,13 @@
 package com.messenger.chat.service;
 
-import com.messenger.chat.domain.EntityNotFoundException;
+import com.messenger.chat.exception.EntityNotFoundException;
 import com.messenger.chat.domain.Message;
-import com.messenger.chat.domain.MessageDto;
-import com.messenger.chat.domain.User;
-import com.messenger.chat.mapper.MessageMapper;
 import com.messenger.chat.repository.MessageRepository;
 import com.messenger.chat.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class MessageService {

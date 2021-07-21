@@ -9,6 +9,7 @@ import java.time.LocalDate;
 @Getter
 @Builder
 public class UserRoomDto {
-    private UserRoomId userRoomId;
+    private Long userId;
+    private Long roomId;
     private LocalDate addedOn;
 }

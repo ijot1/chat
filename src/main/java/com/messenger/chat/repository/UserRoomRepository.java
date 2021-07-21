@@ -2,6 +2,7 @@ package com.messenger.chat.repository;
 
 import com.messenger.chat.domain.UserRoom;
 import com.messenger.chat.domain.UserRoomId;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,9 @@ public interface UserRoomRepository extends CrudRepository<UserRoom, UserRoomId>
 
     @Override
     Optional<UserRoom> findById(UserRoomId id);
+
+    @Query(nativeQuery = true)
+    List<UserRoom> findByRoomId(Long roomId);
 
     @Override
     UserRoom save(UserRoom userRoom);

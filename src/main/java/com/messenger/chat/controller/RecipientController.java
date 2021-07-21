@@ -1,7 +1,5 @@
 package com.messenger.chat.controller;
 
-import com.messenger.chat.annotation.EitherOr;
-import com.messenger.chat.annotation.EitherOrId;
 import com.messenger.chat.domain.*;
 import com.messenger.chat.mapper.RecipientMapper;
 import com.messenger.chat.service.RecipientService;
@@ -51,13 +49,11 @@ public class RecipientController {
     public void createRecipient(@RequestBody RecipientDto recipientDto) {
         Message message = messageService.retrieveMessageById(recipientDto.getMessageId());
         if (recipientDto.getUserRoomUserId() == null && recipientDto.getUserRoomRoomId() == null && recipientDto.getUserId() != null) {
-//            UserRoom userRoom = userRoomService.retrieveUserRoomById(recipientDto.getUserRoomId());
             User user = userService.retrieveUserById(recipientDto.getUserId());
             recipientService.saveRecipient(recipientMapper.mapToRecipient(
                     recipientDto, message, user, null));
         } else if (recipientDto.getUserRoomUserId() != null && recipientDto.getUserRoomRoomId() != null && recipientDto.getUserId() == null) {
-            UserRoom userRoom = userRoomService.retrieveUserRoomById(new UserRoomId(recipientDto.getUserRoomUserId(), recipientDto.getUserRoomRoomId()));
-//            User user = userService.retrieveUserById(recipientDto.getUserId());
+            UserRoom userRoom = userRoomService.retrieveUserRoomByIds(recipientDto.getUserRoomUserId(), recipientDto.getUserRoomRoomId());
             recipientService.saveRecipient(recipientMapper.mapToRecipient(
                     recipientDto, message, null, userRoom));
         }

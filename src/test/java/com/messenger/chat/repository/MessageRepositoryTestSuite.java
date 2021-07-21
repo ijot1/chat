@@ -38,6 +38,7 @@ public class MessageRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -73,6 +74,7 @@ public class MessageRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -117,6 +119,7 @@ public class MessageRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -160,6 +163,7 @@ public class MessageRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 

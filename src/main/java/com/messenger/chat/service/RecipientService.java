@@ -3,6 +3,7 @@ package com.messenger.chat.service;
 import com.messenger.chat.annotation.EitherOr;
 import com.messenger.chat.annotation.EitherOrId;
 import com.messenger.chat.domain.*;
+import com.messenger.chat.exception.EntityNotFoundException;
 import com.messenger.chat.repository.RecipientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,6 @@ public class RecipientService {
     @Autowired
     private RecipientRepository recipientRepository;
 
-    public RecipientService(RecipientRepository recipientRepository) {
-        this.recipientRepository = recipientRepository;
-    }
-
     public List<Recipient> retrieveRecipients() {
         return recipientRepository.findAll();
     }
@@ -30,8 +27,7 @@ public class RecipientService {
     }
 
     public Recipient retrieveRecipientById(Long id) throws EntityNotFoundException {
-//        return recipientRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Recipient.class, id));
-        return recipientRepository.findById(id).orElse(null);
+        return recipientRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Recipient.class, id));
     }
 
     public Recipient saveRecipient(Recipient recipient) {

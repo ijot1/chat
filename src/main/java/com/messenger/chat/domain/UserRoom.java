@@ -17,6 +17,10 @@ import java.util.Set;
 @Setter
 @Builder
 @Entity(name = "UserRoom")
+@NamedNativeQuery(
+        name = "UserRoom.findByRoomId",
+        query = "select ur.* from users_rooms ur where ur.room_id = ?",
+        resultClass = UserRoom.class)
 @Table(name = "USERS_ROOMS")
 public class UserRoom implements Serializable {
 

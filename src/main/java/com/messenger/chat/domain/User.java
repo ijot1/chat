@@ -82,7 +82,7 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "user",
             cascade = {CascadeType.ALL},
             orphanRemoval = true)
-    private Set<UserRoom> userRooms = new HashSet<>();
+    private Set<UserRoom> userUsersRooms = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @JsonIgnore
@@ -137,21 +137,21 @@ public class User implements Serializable {
         }
     }
 
-    public void addRoom(Room room) {
+    public void addUserRoomToUser(Room room) {
         UserRoom userRoom = new UserRoom(this, room);
-        if (!userRooms.contains(userRoom)) {
-            userRooms.add(userRoom);
-            room.getUserRooms().add(userRoom);
+        if (!userUsersRooms.contains(userRoom)) {
+            userUsersRooms.add(userRoom);
+            room.getRoomUsersRooms().add(userRoom);
         }
     }
 
-    public void removeRoom(Room room) {
-        Iterator<UserRoom> iterator = userRooms.iterator();
+    public void removeUserRoomFromUser(Room room) {
+        Iterator<UserRoom> iterator = userUsersRooms.iterator();
         while (iterator.hasNext()) {
             UserRoom ur = iterator.next();
-            if (ur.getRoom().equals(room) && ur.getUser().equals(this)) {
+            if (ur.getUser().equals(this) && ur.getRoom().equals(room)) {
                 iterator.remove();
-                ur.getRoom().getUserRooms().remove(ur);
+                ur.getRoom().getRoomUsersRooms().remove(ur);
                 ur.setUser(null);
                 ur.setRoom(null);
             }

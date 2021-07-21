@@ -1,6 +1,6 @@
 package com.messenger.chat.repository;
 
-import com.messenger.chat.domain.EntityNotFoundException;
+import com.messenger.chat.exception.EntityNotFoundException;
 import com.messenger.chat.domain.*;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -76,7 +76,7 @@ public class RecipientRepositoryTestSuite {
                     .loggedIn(true)
                     .messages(new HashSet<>())
                     .recipients(new HashSet<>())
-                    .userRooms(new HashSet<>())
+                    .userUsersRooms(new HashSet<>())
                     .friends(new HashSet<>())
                     .build();
 
@@ -95,13 +95,13 @@ public class RecipientRepositoryTestSuite {
                     .loggedIn(true)
                     .messages(new HashSet<>())
                     .recipients(new HashSet<>())
-                    .userRooms(new HashSet<>())
+                    .userUsersRooms(new HashSet<>())
                     .friends(new HashSet<>())
                     .build();
 
             em.persist(user2);
             em.getTransaction().commit();
-//
+
             em.getTransaction().begin();
             User user3 = User.builder()
                     .id(null)
@@ -114,7 +114,7 @@ public class RecipientRepositoryTestSuite {
                     .loggedIn(true)
                     .messages(new HashSet<>())
                     .recipients(new HashSet<>())
-                    .userRooms(new HashSet<>())
+                    .userUsersRooms(new HashSet<>())
                     .friends(new HashSet<>())
                     .build();
 
@@ -125,11 +125,10 @@ public class RecipientRepositoryTestSuite {
             Room room = Room.builder()
                     .id(null)
                     .name("Silence Service")
-                    .userRooms(new HashSet<>())
+                    .roomUsersRooms(new HashSet<>())
                     .build();
 
             em.persist(room);
-
             em.getTransaction().commit();
 
             em.getTransaction().begin();
@@ -277,19 +276,19 @@ public class RecipientRepositoryTestSuite {
             em.getTransaction().begin();
             readUser1 = em.merge(user1);
             readUserRoom1 = em.merge(userRoom1);
-            readUser1.getUserRooms().add(readUserRoom1);
+            readUser1.getUserUsersRooms().add(readUserRoom1);
             em.getTransaction().commit();
 
             em.getTransaction().begin();
             readUser2 = em.merge(user2);
             readUserRoom2 = em.merge(userRoom2);
-            readUser2.getUserRooms().add(readUserRoom2);
+            readUser2.getUserUsersRooms().add(readUserRoom2);
             em.getTransaction().commit();
 
             em.getTransaction().begin();
             readUser3 = em.merge(user3);
             readUserRoom3 = em.merge(userRoom3);
-            readUser3.getUserRooms().add(readUserRoom3);
+            readUser3.getUserUsersRooms().add(readUserRoom3);
             em.getTransaction().commit();
 
         } catch (Exception rbEx) {
@@ -302,7 +301,7 @@ public class RecipientRepositoryTestSuite {
 
     }
 
-    @After
+    /*@After
     public void cleanUpRepository() {
 
         try {
@@ -325,7 +324,7 @@ public class RecipientRepositoryTestSuite {
         } catch (EntityNotFoundException nfe) {
             nfe.printStackTrace(System.err);
         }
-    }
+    }*/
 
 
     @Test

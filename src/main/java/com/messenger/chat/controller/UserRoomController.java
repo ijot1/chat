@@ -1,7 +1,8 @@
 package com.messenger.chat.controller;
 
+import com.messenger.chat.domain.Room;
+import com.messenger.chat.domain.User;
 import com.messenger.chat.domain.UserRoomDto;
-import com.messenger.chat.domain.UserRoomId;
 import com.messenger.chat.mapper.UserRoomMapper;
 import com.messenger.chat.service.UserRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,18 +26,23 @@ public class UserRoomController {
         return userRoomMapper.mapToUserRoomDtoList(userRoomService.retrieveUsersRooms());
     }
 
-    @GetMapping(value = "/usersRooms/{userRoomId}")
-    public UserRoomDto getUserRoom(@PathVariable UserRoomId userRoomId) {
-        return userRoomMapper.mapToUserRoomDto(userRoomService.retrieveUserRoomById(userRoomId));
+    @GetMapping(value = "/usersRooms/{userId}/{roomId}")
+    public UserRoomDto getUserRoom(@PathVariable Long userId, @PathVariable Long roomId) {
+        return userRoomMapper.mapToUserRoomDto(userRoomService.retrieveUserRoomByIds(userId, roomId));
+    }
+
+    @GetMapping(value = "/usersRooms/{roomId}")
+    public List<UserRoomDto> getRoomsMembers(@PathVariable Long roomId) {
+        return userRoomMapper.mapToUserRoomDtoList(userRoomService.retrieveUsersRoomsByRoomId(roomId));
     }
 
     @PostMapping(value = "/usersRooms", consumes = APPLICATION_JSON_VALUE)
     public void createUserRoom(@RequestBody UserRoomDto userRoomDto) {
-        userRoomService.saveUserRoom(userRoomMapper.mapToUserRoom(userRoomDto));
+        userRoomService.create(userRoomDto);
     }
 
     @DeleteMapping(value = "/usersRooms", consumes = APPLICATION_JSON_VALUE)
     public void deleteUserRoom(@RequestBody UserRoomDto userRoomDto) {
-        userRoomService.deleteUserRoomByBody(userRoomMapper.mapToUserRoom(userRoomDto));
+        userRoomService.deleteUserRoomByBody(userRoomDto);
     }
 }

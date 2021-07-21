@@ -30,10 +30,31 @@ public class Room implements Serializable {
     @OneToMany(mappedBy = "room",
             cascade = {CascadeType.ALL},   //ALL
             orphanRemoval = true)
-    private Set<UserRoom> userRooms = new HashSet<>();
+    private Set<UserRoom> roomUsersRooms = new HashSet<>();
 
     public Room(String name) {
         this.name = name;
+    }
+
+    public void addUserRoomToRoom(User user) {
+        UserRoom userRoom = new UserRoom(user, this);
+        if (!roomUsersRooms.contains(userRoom)) {
+            roomUsersRooms.add(userRoom);
+            user.getUserUsersRooms().add(userRoom);
+        }
+    }
+
+    public void removeUserRoomFromRoom(User user) {
+        Iterator<UserRoom> iterator = roomUsersRooms.iterator();
+        while (iterator.hasNext()) {
+            UserRoom ur = iterator.next();
+            if (ur.getUser().equals(user) && ur.getRoom().equals(this) ) {
+                iterator.remove();
+                ur.getUser().getUserUsersRooms().remove(ur);
+                ur.setUser(null);
+                ur.setRoom(null);
+            }
+        }
     }
 
     @Override

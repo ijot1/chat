@@ -1,6 +1,9 @@
 package com.messenger.chat.repository;
 
+import com.messenger.chat.domain.Room;
 import com.messenger.chat.domain.User;
+import com.messenger.chat.domain.UserRoom;
+import com.messenger.chat.domain.UserRoomId;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,9 @@ public class UserRepositoryTestSuite {
     public UserRepository userRepository;
 
     @Autowired
+    public RoomRepository roomRepository;
+
+    @Autowired
     private EntityManager em;
 
     @PersistenceUnit
@@ -32,6 +38,9 @@ public class UserRepositoryTestSuite {
     @Test
     public void testSaveUser() {
         //Given
+        em = emFactory.createEntityManager();
+
+        em.getTransaction().begin();
         User user = User.builder()
                 .id(null)
                 .nick("mz")
@@ -43,20 +52,55 @@ public class UserRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
+        em.persist(user);
+        em.getTransaction().commit();
+
+        em.getTransaction().begin();
+        Room room = Room.builder()
+                .id(null)
+                .name("Silence Service")
+                .roomUsersRooms(new HashSet<>())
+                .build();
+
+        em.persist(room);
+        em.getTransaction().commit();
+
+        em.getTransaction().begin();
+        UserRoom userRoom = UserRoom.builder()
+                .id(new UserRoomId(user.getId(), room.getId()))
+                .user(user)
+                .room(room)
+                .addedOn(LocalDate.now())
+                .recipients(new HashSet<>())
+                .build();
+
+        em.persist(room);
+        em.getTransaction().commit();
+
         //When
-        User savedUser = userRepository.save(user);
+        em.getTransaction().begin();
+        User savedUser = em.merge(user);
+        Room savedRoom = em.merge(room);
+        savedUser.addUserRoomToUser(savedRoom);
+
+        em.getTransaction().commit();
+        em.close();
+        savedUser = userRepository.save(user);
 
         String str = savedUser.getLocation();
-        Long id = savedUser.getId();
+        Long id1 = savedUser.getId();
+        Long id2 = savedRoom.getId();
 
         //Then
         Assert.assertEquals("Katowice", str);
 
         //CleanUp
-        userRepository.deleteById(id);
+        userRepository.deleteById(id1);
+        roomRepository.deleteById(id2);
 
     }
 
@@ -74,6 +118,7 @@ public class UserRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -88,6 +133,7 @@ public class UserRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -128,6 +174,7 @@ public class UserRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -142,6 +189,7 @@ public class UserRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -192,7 +240,7 @@ public class UserRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
-                .userRooms(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -211,7 +259,7 @@ public class UserRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
-                .userRooms(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -230,7 +278,7 @@ public class UserRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
-                .userRooms(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -302,7 +350,7 @@ public class UserRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
-                .userRooms(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -321,7 +369,7 @@ public class UserRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
-                .userRooms(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -340,7 +388,7 @@ public class UserRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
-                .userRooms(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -397,7 +445,7 @@ public class UserRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
-                .userRooms(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -416,7 +464,7 @@ public class UserRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
-                .userRooms(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -435,7 +483,7 @@ public class UserRepositoryTestSuite {
                 .loggedIn(false)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
-                .userRooms(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -475,7 +523,7 @@ public class UserRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
-                .userRooms(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -494,7 +542,7 @@ public class UserRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
-                .userRooms(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -513,7 +561,7 @@ public class UserRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
-                .userRooms(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 
@@ -556,6 +604,7 @@ public class UserRepositoryTestSuite {
                 .loggedIn(true)
                 .messages(new HashSet<>())
                 .recipients(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
 

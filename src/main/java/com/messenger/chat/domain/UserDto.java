@@ -37,15 +37,4 @@ public final class UserDto {
     @JsonProperty("loggedIn")
     private boolean loggedIn;
 
-    @JsonProperty("messages")
-    private Set<MessageDto> messages;
-
-    @JsonProperty("recipients")
-    private Set<RecipientDto> recipients;
-
-    @JsonProperty("friends")
-    private Set<UserDto> friends;
-
-    @JsonProperty("senders")
-    private Set<UserDto> senders;
 }

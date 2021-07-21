@@ -1,4 +1,4 @@
-package com.messenger.chat.domain;
+package com.messenger.chat.exception;
 
 
 import java.util.function.Supplier;

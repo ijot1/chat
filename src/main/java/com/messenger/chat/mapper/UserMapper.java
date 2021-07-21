@@ -38,12 +38,6 @@ public class UserMapper {
                 .build();
     }
 
-    /*public List<UserDto> mapToUserDtoList(final List<User> userList) {
-        return userList.stream()
-                .map(this::mapToUserDto)
-                .collect(Collectors.toList());
-    }*/
-
     public List<UserDto> mapToUserDtoList(final List<User> userList) {
         return userList.stream()
                 .map(this::mapToUserDto)

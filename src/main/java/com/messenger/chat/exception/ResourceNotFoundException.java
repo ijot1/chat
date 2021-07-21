@@ -1,4 +1,4 @@
-package com.messenger.chat.domain;
+package com.messenger.chat.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(final String message) {

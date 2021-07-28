@@ -7,6 +7,7 @@ import com.messenger.chat.mapper.MessageMapper;
 import com.messenger.chat.service.MessageService;
 import com.messenger.chat.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -36,6 +37,7 @@ public class MessageController {
     }
 
     @PostMapping(value = "/messages")
+    @Transactional  //both the findById and the persist methods participate in the same transaction
     public MessageDto createMessage(@RequestBody MessageDto messageDto) {
         User creator = userService.retrieveUserById(messageDto.getCreatorId());
         return messageMapper.mapToMessageDto(messageService.saveMessage(messageMapper.mapToMessage(messageDto, creator)));

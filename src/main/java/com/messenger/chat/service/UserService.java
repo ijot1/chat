@@ -38,7 +38,7 @@ public class UserService {
     }
 
     public User retrieveUserById(final Long id) throws EntityNotFoundException {
-        return userRepository.findById(id).orElse(null);
+        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(User.class, id));
     }
 
     public User saveUser(User user) {

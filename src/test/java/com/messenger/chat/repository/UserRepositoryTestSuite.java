@@ -44,7 +44,7 @@ public class UserRepositoryTestSuite {
         User user = User.builder()
                 .id(null)
                 .nick("mz")
-                .name("Milena-Zanik")
+                .name("")
                 .sex('W')
                 .location("Katowice")
                 .createdOn(LocalDate.now())
@@ -89,18 +89,20 @@ public class UserRepositoryTestSuite {
 
         em.getTransaction().commit();
         em.close();
-        savedUser = userRepository.save(user);
 
-        String str = savedUser.getLocation();
-        Long id1 = savedUser.getId();
-        Long id2 = savedRoom.getId();
+        savedUser.setName("Milena-Zanik");
+        user = userRepository.save(savedUser);
+
+        String str = savedUser.getName();
+        Long userId = savedUser.getId();
+        Long roomId = savedRoom.getId();
 
         //Then
-        Assert.assertEquals("Katowice", str);
+        Assert.assertEquals("Milena-Zanik", str);
 
         //CleanUp
-        userRepository.deleteById(id1);
-        roomRepository.deleteById(id2);
+        userRepository.deleteById(userId);
+        roomRepository.deleteById(roomId);
 
     }
 
@@ -285,7 +287,6 @@ public class UserRepositoryTestSuite {
         em.persist(user3);
         em.getTransaction().commit();
 
-        //When
         user1 = (User) userRepository.findAll().toArray()[0];
         user2 = (User) userRepository.findAll().toArray()[1];
         user3 = (User) userRepository.findAll().toArray()[2];
@@ -297,6 +298,7 @@ public class UserRepositoryTestSuite {
         userRepository.addUsersFriend(user3.getId(), user1.getId());
         userRepository.addUsersFriend(user3.getId(), user2.getId());
 
+        //When
         int f1 = userRepository.findFriends(user1.getId()).size();
         int f2 = userRepository.findFriends(user2.getId()).size();
         int f3 = userRepository.findFriends(user3.getId()).size();

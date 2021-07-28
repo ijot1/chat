@@ -31,6 +31,10 @@ public interface UserRepository extends CrudRepository<User, Long> {
     void deleteUsersFriend(@Param("userId") Long userId,
                         @Param("friendId") Long friendId);
 
+    @Modifying
+    @Query(nativeQuery = true)
+    void deleteUserById(@Param("userId") Long userId);
+
     @Override
     List<User> findAll();
 

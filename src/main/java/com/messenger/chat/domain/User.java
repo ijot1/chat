@@ -32,6 +32,10 @@ import java.util.Set;
         @NamedNativeQuery(
                 name = "User.deleteUsersFriend",
                 query = "delete from users_friends where friend_id = :friendId and user_id = :userId",  //where friend_id = :friendId and user_id = :userId
+                resultClass = User.class),
+        @NamedNativeQuery(
+                name = "User.deleteUserById",
+                query = "delete from users where user_id = ?",  //where friend_id = :friendId and user_id = :userId
                 resultClass = User.class)
 })
 
@@ -66,25 +70,26 @@ public class User implements Serializable {
     private boolean loggedIn;
 
     @OneToMany(mappedBy = "creator",
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,
+            fetch = FetchType.EAGER, //LAZY
+            cascade = CascadeType.PERSIST,  //ALL
             orphanRemoval = true)
     @JsonIgnore
     private Set<Message> messages;
 
     @OneToMany(mappedBy = "user",
             cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY,
+            fetch = FetchType.EAGER, //LAZY
             orphanRemoval = true)
-    @JsonIgnore
+//    @JsonIgnore
     private Set<Recipient> recipients;
 
     @OneToMany(mappedBy = "user",
-            cascade = {CascadeType.ALL},
+            cascade = CascadeType.ALL,
+            fetch = FetchType.EAGER,
             orphanRemoval = true)
     private Set<UserRoom> userUsersRooms = new HashSet<>();
 
-    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @ManyToMany(cascade = CascadeType.ALL/*{CascadeType.MERGE, CascadeType.PERSIST, CascadeType.DETACH}*/)
     @JsonIgnore
     @JoinTable(name = "users_friends",
             joinColumns = {@JoinColumn(name = "USER_ID")},

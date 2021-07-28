@@ -2,11 +2,14 @@ package com.messenger.chat.repository;
 
 import com.messenger.chat.domain.*;
 import com.messenger.chat.exception.EntityNotFoundException;
+import com.messenger.chat.exception.ResourceNotFoundException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -137,37 +140,24 @@ public class UserRoomRepositoryTestSuite {
         em.getTransaction().commit();
 
         em.getTransaction().begin();
-        User readUser3 = em.merge(user3);
-        readRoom = em.merge(room);
-        UserRoom userRoom3 = UserRoom.builder()
-                .id(new UserRoomId(readUser3.getId(), readRoom.getId()))
-                .user(readUser3)
-                .room(readRoom)
-                .addedOn(LocalDate.now())
-                .recipients(new HashSet<>())
-                .build();
-
-        em.persist(userRoom3);
+        User u1 = em.merge(user1);
+        UserRoom uR2 = em.merge(userRoom2);
+        u1.getUserUsersRooms().add(uR2);
         em.getTransaction().commit();
+
+        em.getTransaction().begin();
+        User u2 = em.merge(user2);
+        UserRoom uR1 = em.merge(userRoom1);
+        u2.getUserUsersRooms().add(uR1);
+        em.getTransaction().commit();
+        em.close();
 
     }
 
     @After
     public void testCleanUpAfterExecutionUserRoom() {
-        Long rId = ((Room) roomRepository.findAll().toArray()[0]).getId();
-
-        User user1 = (User) userRepository.findAll().toArray()[0];
-        User user2 = (User) userRepository.findAll().toArray()[1];
-        User user3 = (User) userRepository.findAll().toArray()[2];
-
-        try {
-            roomRepository.deleteById(rId);
-            userRepository.delete(user1);
-            userRepository.delete(user2);
-            userRepository.delete(user3);
-        } catch (EntityNotFoundException nfe) {
-            nfe.printStackTrace(System.err);
-        }
+            userRepository.deleteAll();
+            roomRepository.deleteAll();
     }
 
     @Test
@@ -179,18 +169,20 @@ public class UserRoomRepositoryTestSuite {
         int count = userRoomRepository.findAll().size();
 
         //Then
-        Assert.assertEquals(3, count);
+        Assert.assertEquals(2, count);
     }
 
     @Test
     public void testFindUserRoomById() {
         //Given
         //@Before prepared data
-        UserRoom userRoom1 = (UserRoom)userRoomRepository.findAll().toArray()[0];
+        UserRoom userRoom1 = (UserRoom) userRoomRepository.findAll().toArray()[0];
         UserRoomId uR1Id = userRoom1.getId();
 
         //When
-        UserRoom userRoom = userRoomRepository.findById(uR1Id).orElse(null);
+        UserRoom userRoom = userRoomRepository.findById(uR1Id).orElseThrow(
+                () -> new ResourceNotFoundException("UserRoom not found")
+        );
         String userRoomUserName = userRoom.getUser().getName();
 
         //Then
@@ -198,17 +190,17 @@ public class UserRoomRepositoryTestSuite {
     }
 
     @Test
-    public void testfindUsersRoomsByRoomId() {
+    public void testFindUsersRoomsByRoomId() {
         //Given
         //@Before prepared data
-        UserRoom userRoom = (UserRoom)userRoomRepository.findAll().toArray()[0];
+        UserRoom userRoom = (UserRoom) userRoomRepository.findAll().toArray()[0];
         Long roomId = userRoom.getRoom().getId();
 
         //When
         int count = userRoomRepository.findByRoomId(roomId).size();
 
         //Then
-        Assert.assertEquals(3, count);
+        Assert.assertEquals(2, count);
     }
 
     @Test
@@ -216,24 +208,30 @@ public class UserRoomRepositoryTestSuite {
         //Given
         //@Before prepared data
         em = emFactory.createEntityManager();
-        UserRoom uR1 = (UserRoom) userRoomRepository.findAll().toArray()[0];
+
+        User user3 = (User) userRepository.findAll().toArray()[2];
+        Room room = (Room) roomRepository.findAll().toArray()[0];
 
         em.getTransaction().begin();
-        UserRoom readUserRoom1 = em.merge(uR1);
+        User readUser3 = em.merge(user3);
+        Room readRoom = em.merge(room);
         em.getTransaction().commit();
         em.close();
 
-        userRoomRepository.delete(readUserRoom1);
-
-        int countBeforeSave = userRoomRepository.findAll().size();
+        UserRoom userRoom = UserRoom.builder()
+                .id(new UserRoomId(readUser3.getId(), readRoom.getId()))
+                .user(readUser3)
+                .room(readRoom)
+                .addedOn(LocalDate.now())
+                .recipients(new HashSet<>())
+                .build();
+        userRoomRepository.save(userRoom);
 
         //When
-        userRoomRepository.save(readUserRoom1);
-        int countAfterSave = userRoomRepository.findAll().size();
+        int count = userRoomRepository.findAll().size();
 
         //Then
-        Assert.assertEquals(2, countBeforeSave);
-        Assert.assertEquals(3, countAfterSave);
+        Assert.assertEquals(3, count);
     }
 
     @Test
@@ -248,6 +246,6 @@ public class UserRoomRepositoryTestSuite {
         int count = userRoomRepository.findAll().size();
 
         //Then
-        Assert.assertEquals(2, count);
+        Assert.assertEquals(1, count);
     }
 }

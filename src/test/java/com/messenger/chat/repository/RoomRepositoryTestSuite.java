@@ -36,79 +36,52 @@ public class RoomRepositoryTestSuite {
     @Test
     public void testSaveRoom() {
         //Given
-        em = emFactory.createEntityManager();
-
-        em.getTransaction().begin();
         Room room = Room.builder()
                 .id(null)
                 .name("Silence Service")
                 .roomUsersRooms(new HashSet<>())
                 .build();
 
-        em.persist(room);
-        em.getTransaction().commit();
-
-        em.getTransaction().begin();
-        User user = User.builder()
-                .id(null)
-                .nick("ij")
-                .name("Irena-Janik")
-                .sex('W')
-                .location("Bangalore")
-                .createdOn(LocalDate.now())
-                .password("Zaq12wsx")
-                .loggedIn(true)
-                .messages(new HashSet<>())
-                .recipients(new HashSet<>())
-                .userUsersRooms(new HashSet<>())
-                .friends(new HashSet<>())
-                .build();
-
-        em.persist(user);
-        em.getTransaction().commit();
+        roomRepository.save(room);
 
         //When
-        em.getTransaction().begin();
-        User userSaved = em.merge(user);
-        Room roomSaved = em.merge(room);
-        roomSaved.addUserRoomToRoom(userSaved);
-        em.getTransaction().commit();
-        em.close();
-
+        Room roomSaved = (Room) roomRepository.findAll().toArray()[0];
         String roomsName = roomSaved.getName();
-        UserRoom ur = (UserRoom) roomSaved.getRoomUsersRooms().toArray()[0];
-        String userRoomsUserName = ur.getUser().getName();
-        Long id1 = roomSaved.getId();
-        Long id2 = userSaved.getId();
+        Long id = roomSaved.getId();
 
         //Then
         Assert.assertEquals("Silence Service", roomsName);
-        Assert.assertEquals("Irena-Janik", userRoomsUserName);
 
         //CleanUp
-        roomRepository.deleteById(id1);
-        userRepository.deleteById(id2);
+        roomRepository.deleteById(id);
     }
 
     @Test
     public void testFindRooms() {
-
         //Given
+        em = emFactory.createEntityManager();
+
+        em.getTransaction().begin();
         Room room1 = Room.builder()
                 .id(null)
                 .name("Silence Service")
                 .roomUsersRooms(new HashSet<>())
                 .build();
 
+        em.persist(room1);
+        em.getTransaction().commit();
+
+        em.getTransaction().begin();
         Room room2 = Room.builder()
                 .id(null)
                 .name("Java Talks")
                 .roomUsersRooms(new HashSet<>())
                 .build();
 
+        em.persist(room2);
+        em.getTransaction().commit();
+
         //When
-        roomRepository.save(room1);
-        roomRepository.save(room2);
         int count = roomRepository.findAll().size();
         Long id1 = room1.getId();
         Long id2 = room2.getId();
@@ -125,31 +98,31 @@ public class RoomRepositoryTestSuite {
     public void testFindRoomById() {
 
         //Given
-        Room room1 = Room.builder()
+        em = emFactory.createEntityManager();
+
+        em.getTransaction().begin();
+        Room room = Room.builder()
                 .id(null)
                 .name("Silence Service")
                 .roomUsersRooms(new HashSet<>())
                 .build();
 
-        Room room2 = Room.builder()
-                .id(null)
-                .name("Java Talks")
-                .roomUsersRooms(new HashSet<>())
-                .build();
+        em.persist(room);
+        em.getTransaction().commit();
 
         //When
-        roomRepository.save(room1);
-        roomRepository.save(room2);
-        int count = roomRepository.findAll().size();
-        Long id1 = room1.getId();
-        Long id2 = room2.getId();
-        Room readRoom = roomRepository.findById(id2).orElse(new Room("No such room"));
+        em.getTransaction().begin();
+        Room readRoom = em.merge(room);
+        Long id = readRoom.getId();
+        em.getTransaction().commit();
+        em.close();
+
+        Room foundRoom = roomRepository.findById(id).orElse(new Room("No such room"));
 
         //Then
-        Assert.assertEquals(room2, readRoom);
+        Assert.assertEquals(readRoom, foundRoom);
 
         //CleanUp
-        roomRepository.deleteById(id1);
-        roomRepository.deleteById(id2);
+        roomRepository.deleteById(id);
     }
 }

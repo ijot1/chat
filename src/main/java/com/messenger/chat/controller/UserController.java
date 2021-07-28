@@ -5,6 +5,7 @@ import com.messenger.chat.domain.UserDto;
 import com.messenger.chat.mapper.UserMapper;
 import com.messenger.chat.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import sun.management.snmp.jvminstr.JvmOSImpl;
 
@@ -27,12 +28,12 @@ public class UserController {
         return userMapper.mapToUserDtoList(userService.retrieveUsers());
     }
 
-    @GetMapping(value = "/loggedInUsers")
+    @GetMapping(value = "/users/loggedIn")
     public List<UserDto> getLoggedInUsers() {
         return userMapper.mapToUserDtoList(userService.retrieveLoggedInUsers());
     }
 
-    @GetMapping(value = "/friends/{senderId}")
+    @GetMapping(value = "/users/friends/{senderId}")
     public List<UserDto> getFriends(@PathVariable Long senderId) {
         return userMapper.mapToUserDtoList(userService.retrieveSendersFriends(senderId)); }
 
@@ -41,12 +42,12 @@ public class UserController {
         return userMapper.mapToUserDto(userService.retrieveUserById(userId));
     }
 
-    @PutMapping(value = "/users/{userId, friendId}")
+    @PutMapping(value = "/users/friends/{userId}/{friendId}")
     public void addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
         userService.addSendersFriend(userId, friendId);
     }
 
-    @DeleteMapping(value = "/users/{userId, friendId}")
+    @DeleteMapping(value = "/users/friends/{userId}/{friendId}")
     public void deleteFriend(@PathVariable Long userId, @PathVariable Long friendId) {
         userService.deleteSendersFriend(userId, friendId);
     }

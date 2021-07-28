@@ -28,7 +28,7 @@ public class Room implements Serializable {
     private String name;
 
     @OneToMany(mappedBy = "room",
-            cascade = {CascadeType.ALL},   //ALL
+            cascade = {CascadeType.ALL},
             orphanRemoval = true)
     private Set<UserRoom> roomUsersRooms = new HashSet<>();
 

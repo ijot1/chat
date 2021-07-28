@@ -28,12 +28,12 @@ public class UserRoom implements Serializable {
     private UserRoomId id;
 
     @MapsId("USER_ID")
-    @ManyToOne  //FetchType.LAZY
+    @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "USER_ID", insertable = false, updatable = false)
     private User user;
 
     @MapsId("ROOM_ID")
-    @ManyToOne  //FetchType.LAZY
+    @ManyToOne
     @JoinColumn(name = "ROOM_ID", insertable = false, updatable = false)
     private Room room;
 

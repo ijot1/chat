@@ -9,18 +9,24 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class RecipientRepositoryTestSuite {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RecipientRepositoryTestSuite.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -46,8 +52,6 @@ public class RecipientRepositoryTestSuite {
     public static Long user1Id;
     public static Long user2Id;
     public static Long user3Id;
-
-//    public static Long roomId;
 
     public static Long message1Id;
     public static Long message2Id;
@@ -291,6 +295,8 @@ public class RecipientRepositoryTestSuite {
             readUser3.getUserUsersRooms().add(readUserRoom3);
             em.getTransaction().commit();
 
+            System.out.println("count = " + recipientRepository.findAll().size());
+
         } catch (Exception rbEx) {
             System.err.println("Rollback of transaction failed, trace follows!");
             rbEx.printStackTrace(System.err);
@@ -301,31 +307,15 @@ public class RecipientRepositoryTestSuite {
 
     }
 
-    /*@After
+    @After
     public void cleanUpRepository() {
+        recipientRepository.deleteAll();
+        userRoomRepository.deleteAll();
+        messageRepository.deleteAll();
+        userRepository.deleteAll();
+        roomRepository.deleteAll();
 
-        try {
-            User user1 = (User) userRepository.findAll().toArray()[0];
-            User user2 = (User) userRepository.findAll().toArray()[1];
-            User user3 = (User) userRepository.findAll().toArray()[2];
-
-            Long id1 = user1.getId();
-            Long id2 = user2.getId();
-            Long id3 = user3.getId();
-
-            userRepository.deleteById(id1);
-            userRepository.deleteById(id2);
-            userRepository.deleteById(id3);
-
-            Room r = (Room) roomRepository.findAll().toArray()[0];
-            Long rId = r.getId();
-
-            roomRepository.deleteById(rId);
-        } catch (EntityNotFoundException nfe) {
-            nfe.printStackTrace(System.err);
-        }
-    }*/
-
+    }
 
     @Test
     public void testFindRecipientByMessageIdAndUserIdOrUserRoomId() {

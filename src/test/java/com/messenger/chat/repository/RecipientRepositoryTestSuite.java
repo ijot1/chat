@@ -1,7 +1,7 @@
 package com.messenger.chat.repository;
 
-import com.messenger.chat.exception.EntityNotFoundException;
 import com.messenger.chat.domain.*;
+import com.messenger.chat.exception.EntityNotFoundException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.After;
@@ -14,13 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -65,7 +63,7 @@ public class RecipientRepositoryTestSuite {
     public static Long recipient3Id;
 
     @Before
-    public void testPrepareMessageRecipientRepositoryTestSuite() {
+    public void prepareMessageRecipientRepositoryTestData() {
         EntityManager em = emFactory.createEntityManager();
         try {
             em.getTransaction().begin();

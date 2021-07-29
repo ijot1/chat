@@ -1,10 +1,8 @@
 package com.messenger.chat.domain;
 
 import lombok.*;
-import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.HashSet;

@@ -35,6 +35,11 @@ public class UserRepositoryTestSuite {
     @PersistenceUnit
     public EntityManagerFactory emFactory = Persistence.createEntityManagerFactory("ChatPU");
 
+    @After
+    public void cleanUpRepository() {
+        userRepository.deleteAll();
+    }
+
     @Test
     public void testSaveUser() {
         //Given
@@ -94,15 +99,9 @@ public class UserRepositoryTestSuite {
         user = userRepository.save(savedUser);
 
         String str = savedUser.getName();
-        Long userId = savedUser.getId();
-        Long roomId = savedRoom.getId();
 
         //Then
         Assert.assertEquals("Milena-Zanik", str);
-
-        //CleanUp
-        userRepository.deleteById(userId);
-        roomRepository.deleteById(roomId);
 
     }
 
@@ -148,15 +147,9 @@ public class UserRepositoryTestSuite {
         user1 = (User) userRepository.findAll().toArray()[0];
         user2 = (User) userRepository.findAll().toArray()[1];
 
-        Long id1 = user1.getId();
-        Long id2 = user2.getId();
 
         //Then
         Assert.assertEquals(2, count);
-
-        //CleanUp
-        userRepository.deleteById(user1.getId());
-        userRepository.deleteById(user2.getId());
 
     }
 
@@ -218,10 +211,6 @@ public class UserRepositoryTestSuite {
 
         //Then
         Assert.assertEquals(1, user1FriendsCount);
-
-        //CleanUp
-        userRepository.deleteById(user1.getId());
-        userRepository.deleteById(user2.getId());
 
     }
 
@@ -328,10 +317,6 @@ public class UserRepositoryTestSuite {
         if (em != null && em.isOpen())
             em.close(); // You create it, you close it!
 
-        userRepository.deleteById(user1.getId());
-        userRepository.deleteById(user2.getId());
-        userRepository.deleteById(user3.getId());
-
     }
 
     @Test
@@ -424,10 +409,6 @@ public class UserRepositoryTestSuite {
         //Then
         Assert.assertEquals(0, fNr);
 
-        //CleanUp
-        userRepository.deleteById(user1.getId());
-        userRepository.deleteById(user2.getId());
-        userRepository.deleteById(user3.getId());
     }
 
     @Test
@@ -500,11 +481,6 @@ public class UserRepositoryTestSuite {
 
         //Then
         Assert.assertEquals(2, count);
-
-        //CleanUp
-        userRepository.deleteById(user1.getId());
-        userRepository.deleteById(user2.getId());
-        userRepository.deleteById(user3.getId());
 
     }
 
@@ -581,11 +557,6 @@ public class UserRepositoryTestSuite {
 
         //Then
         Assert.assertEquals("kk", str);
-
-        //CleanUp
-        userRepository.deleteById(user1.getId());
-        userRepository.deleteById(user2.getId());
-        userRepository.deleteById(user3.getId());
 
     }
 

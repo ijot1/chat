@@ -3,6 +3,7 @@ package com.messenger.chat.repository;
 import com.messenger.chat.domain.Room;
 import com.messenger.chat.domain.User;
 import com.messenger.chat.domain.UserRoom;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +34,11 @@ public class RoomRepositoryTestSuite {
     @PersistenceUnit
     public EntityManagerFactory emFactory = Persistence.createEntityManagerFactory("ChatPU");
 
+    @After
+    public void cleanUpRepository() {
+        roomRepository.deleteAll();
+    }
+
     @Test
     public void testSaveRoom() {
         //Given
@@ -47,13 +53,10 @@ public class RoomRepositoryTestSuite {
         //When
         Room roomSaved = (Room) roomRepository.findAll().toArray()[0];
         String roomsName = roomSaved.getName();
-        Long id = roomSaved.getId();
 
         //Then
         Assert.assertEquals("Silence Service", roomsName);
 
-        //CleanUp
-        roomRepository.deleteById(id);
     }
 
     @Test
@@ -83,15 +86,10 @@ public class RoomRepositoryTestSuite {
 
         //When
         int count = roomRepository.findAll().size();
-        Long id1 = room1.getId();
-        Long id2 = room2.getId();
 
         //Then
         Assert.assertEquals(2, count);
 
-        //CleanUp
-        roomRepository.deleteById(id1);
-        roomRepository.deleteById(id2);
     }
 
     @Test
@@ -122,7 +120,5 @@ public class RoomRepositoryTestSuite {
         //Then
         Assert.assertEquals(readRoom, foundRoom);
 
-        //CleanUp
-        roomRepository.deleteById(id);
     }
 }

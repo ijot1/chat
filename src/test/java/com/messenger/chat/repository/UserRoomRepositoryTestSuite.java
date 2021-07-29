@@ -1,15 +1,15 @@
 package com.messenger.chat.repository;
 
-import com.messenger.chat.domain.*;
-import com.messenger.chat.exception.EntityNotFoundException;
+import com.messenger.chat.domain.Room;
+import com.messenger.chat.domain.User;
+import com.messenger.chat.domain.UserRoom;
+import com.messenger.chat.domain.UserRoomId;
 import com.messenger.chat.exception.ResourceNotFoundException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -41,7 +41,7 @@ public class UserRoomRepositoryTestSuite {
     public EntityManagerFactory emFactory = Persistence.createEntityManagerFactory("ChatPU");
 
     @Before
-    public void testPrepareUserRoomRepositoryTestSuite() {
+    public void prepareUserRoomRepositoryTestData() {
         em = emFactory.createEntityManager();
 
         em.getTransaction().begin();
@@ -155,7 +155,7 @@ public class UserRoomRepositoryTestSuite {
     }
 
     @After
-    public void testCleanUpAfterExecutionUserRoom() {
+    public void cleanUpRepository() {
             userRepository.deleteAll();
             roomRepository.deleteAll();
     }

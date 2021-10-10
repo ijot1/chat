@@ -23,7 +23,8 @@ public class RecipientService {
     }
 
     public List<Recipient> retrieveRecipientByParametersId(Long messageId, UserRoomId userRoomId, Long userId) {
-        return recipientRepository.findRecipientByMessageIdAndUserIdOrUserRoomId(messageId, userRoomId.getRoomId(), userId);
+        /*return recipientRepository.findRecipientByMessageIdAndUserIdOrUserRoomId(messageId, userRoomId.getRoomId(), userId);*/
+        return recipientRepository.findRecipientsByMessageIdAndUserIdOrUserRoomId_RoomId(messageId, userRoomId.getRoomId(), userId);
     }
 
     public Recipient retrieveRecipientById(Long id) throws EntityNotFoundException {

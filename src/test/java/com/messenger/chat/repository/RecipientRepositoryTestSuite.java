@@ -54,6 +54,8 @@ public class RecipientRepositoryTestSuite {
     public static Long message1Id;
     public static Long message2Id;
 
+    public static Long roomId;
+
     public static UserRoomId userRoom1Id;
     public static UserRoomId userRoom2Id;
     public static UserRoomId userRoom3Id;
@@ -64,7 +66,7 @@ public class RecipientRepositoryTestSuite {
 
     @Before
     public void prepareMessageRecipientRepositoryTestData() {
-        EntityManager em = emFactory.createEntityManager();
+        em = emFactory.createEntityManager();
         try {
             em.getTransaction().begin();
             User user1 = User.builder()
@@ -81,11 +83,8 @@ public class RecipientRepositoryTestSuite {
                     .userUsersRooms(new HashSet<>())
                     .friends(new HashSet<>())
                     .build();
-
             em.persist(user1);
-            em.getTransaction().commit();
 
-            em.getTransaction().begin();
             User user2 = User.builder()
                     .id(null)
                     .nick("jk")
@@ -100,11 +99,8 @@ public class RecipientRepositoryTestSuite {
                     .userUsersRooms(new HashSet<>())
                     .friends(new HashSet<>())
                     .build();
-
             em.persist(user2);
-            em.getTransaction().commit();
 
-            em.getTransaction().begin();
             User user3 = User.builder()
                     .id(null)
                     .nick("kk")
@@ -119,29 +115,31 @@ public class RecipientRepositoryTestSuite {
                     .userUsersRooms(new HashSet<>())
                     .friends(new HashSet<>())
                     .build();
-
             em.persist(user3);
-            em.getTransaction().commit();
 
-            em.getTransaction().begin();
             Room room = Room.builder()
                     .id(null)
                     .name("Silence Service")
                     .roomUsersRooms(new HashSet<>())
                     .build();
-
             em.persist(room);
+
             em.getTransaction().commit();
 
             em.getTransaction().begin();
-            User readUser1 = em.merge(user1);
-            User readUser2 = em.merge(user2);
+            user1 = em.merge(user1);
+            user2 = em.merge(user2);
+            user3 = em.merge(user3);
+
+            user1Id = user1.getId();
+            user2Id = user2.getId();
+            user3Id = user3.getId();
 
             Message message1 = Message.builder()
                     .id(null)
                     .messageText("Message #1 text")
                     .dateCreated(LocalDate.now())
-                    .creator(readUser1)
+                    .creator(user1)
                     .recipientSet(new HashSet<>())
                     .build();
 
@@ -149,7 +147,7 @@ public class RecipientRepositoryTestSuite {
                     .id(null)
                     .messageText("Message #2 text")
                     .dateCreated(LocalDate.now())
-                    .creator(readUser2)
+                    .creator(user2)
                     .recipientSet(new HashSet<>())
                     .build();
 
@@ -159,47 +157,39 @@ public class RecipientRepositoryTestSuite {
             em.getTransaction().commit();
 
             em.getTransaction().begin();
-
-            readUser1 = em.merge(user1);
-            readUser2 = em.merge(user2);
-            User readUser3 = em.merge(user3);
-
-            Room readRoom = em.merge(room);
+            em.merge(room);
+            roomId = room.getId();
 
             UserRoom userRoom1 = UserRoom.builder()
-                    .id(new UserRoomId(readUser1.getId(), readRoom.getId()))
-                    .user(readUser1)
-                    .room(readRoom)
+                    .id(new UserRoomId(user1.getId(), room.getId()))
+                    .user(user1)
+                    .room(room)
                     .addedOn(LocalDate.now())
                     .recipients(new HashSet<>())
                     .build();
-
             em.persist(userRoom1);
 
             UserRoom userRoom2 = UserRoom.builder()
-                    .id(new UserRoomId(readUser2.getId(), readRoom.getId()))
-                    .user(readUser2)
-                    .room(readRoom)
+                    .id(new UserRoomId(user2.getId(), room.getId()))
+                    .user(user2)
+                    .room(room)
                     .addedOn(LocalDate.now())
                     .recipients(new HashSet<>())
                     .build();
-
             em.persist(userRoom2);
 
             UserRoom userRoom3 = UserRoom.builder()
-                    .id(new UserRoomId(readUser3.getId(), readRoom.getId()))
-                    .user(readUser3)
-                    .room(readRoom)
+                    .id(new UserRoomId(user3.getId(), room.getId()))
+                    .user(user3)
+                    .room(room)
                     .addedOn(LocalDate.now())
                     .recipients(new HashSet<>())
                     .build();
-
             em.persist(userRoom3);
 
             em.getTransaction().commit();
 
             em.getTransaction().begin();
-
             em.merge(userRoom1);
             em.merge(userRoom2);
             em.merge(userRoom3);
@@ -208,52 +198,41 @@ public class RecipientRepositoryTestSuite {
             userRoom2Id = userRoom2.getId();
             userRoom3Id = userRoom3.getId();
 
-            UserRoom readUserRoom1 = em.find(UserRoom.class, userRoom1Id);
-            UserRoom readUserRoom2 = em.find(UserRoom.class, userRoom2Id);
-            UserRoom readUserRoom3 = em.find(UserRoom.class, userRoom3Id);
+            em.merge(message1);
+            em.merge(message2);
 
-            em.getTransaction().commit();
-
-            em.getTransaction().begin();
-
-            Message readMessage1 = em.merge(message1);
-            Message readMessage2 = em.merge(message2);
-
-            message1Id = readMessage1.getId();
-            message2Id = readMessage2.getId();
+            message1Id = message1.getId();
+            message2Id = message2.getId();
 
             Recipient recipient1 = Recipient.builder()
                     .id(null)
                     .addedOn(LocalDate.now())
                     .message(message2)
                     .userRoom(null)
-                    .user(readUser1)
+                    .user(user1)
                     .build();
+            em.persist(recipient1);
 
             Recipient recipient2 = Recipient.builder()
                     .id(null)
                     .addedOn(LocalDate.now())
                     .message(message1)
-                    .userRoom(readUserRoom2)
+                    .userRoom(userRoom2)
                     .user(null)
                     .build();
+            em.persist(recipient2);
 
             Recipient recipient3 = Recipient.builder()
                     .id(null)
                     .addedOn(LocalDate.now())
                     .message(message1)
-                    .userRoom(readUserRoom3)
+                    .userRoom(userRoom3)
                     .user(null)
                     .build();
-
-            em.persist(recipient1);
-            em.persist(recipient2);
             em.persist(recipient3);
-
             em.getTransaction().commit();
 
             em.getTransaction().begin();
-
             em.merge(recipient1);
             em.merge(recipient2);
             em.merge(recipient3);
@@ -262,38 +241,27 @@ public class RecipientRepositoryTestSuite {
             recipient2Id = recipient2.getId();
             recipient3Id = recipient3.getId();
 
-            em.getTransaction().commit();
+            em.merge(userRoom2);
+            em.merge(userRoom3);
 
-            em.getTransaction().begin();
-            readUser1 = em.merge(user1);
-            readUser1.addRecipient(recipient1);
-            em.getTransaction().commit();
+            userRoom2.addMessageRecipient(recipient2);
+            userRoom3.addMessageRecipient(recipient3);
+            em.merge(user1);
+            user1.addRecipient(recipient1);
+            em.merge(user1);
+            em.merge(user2);
+            user1.addFriend(user2);
+            em.merge(userRoom1);
+            user1.getUserUsersRooms().add(userRoom1);
+            userRoom2 = em.merge(userRoom2);
+            user2.getUserUsersRooms().add(userRoom2);
+            em.merge(user3);
+            em.merge(userRoom3);
+            user3.getUserUsersRooms().add(userRoom3);
 
-            em.getTransaction().begin();
-            readUser1 = em.merge(user1);
-            readUser2 = em.merge(user2);
-            readUser1.addFriend(readUser2);
+            em.flush();
+            em.clear();
             em.getTransaction().commit();
-
-            em.getTransaction().begin();
-            readUser1 = em.merge(user1);
-            readUserRoom1 = em.merge(userRoom1);
-            readUser1.getUserUsersRooms().add(readUserRoom1);
-            em.getTransaction().commit();
-
-            em.getTransaction().begin();
-            readUser2 = em.merge(user2);
-            readUserRoom2 = em.merge(userRoom2);
-            readUser2.getUserUsersRooms().add(readUserRoom2);
-            em.getTransaction().commit();
-
-            em.getTransaction().begin();
-            readUser3 = em.merge(user3);
-            readUserRoom3 = em.merge(userRoom3);
-            readUser3.getUserUsersRooms().add(readUserRoom3);
-            em.getTransaction().commit();
-
-            System.out.println("count = " + recipientRepository.findAll().size());
 
         } catch (Exception rbEx) {
             System.err.println("Rollback of transaction failed, trace follows!");
@@ -307,11 +275,47 @@ public class RecipientRepositoryTestSuite {
 
     @After
     public void cleanUpRepository() {
-        recipientRepository.deleteAll();
-        userRoomRepository.deleteAll();
-        messageRepository.deleteAll();
-        userRepository.deleteAll();
-        roomRepository.deleteAll();
+        em = emFactory.createEntityManager();
+
+        em.getTransaction().begin();
+
+        User user1 = em.find(User.class, user1Id);
+        User user2 = em.find(User.class, user2Id);
+        User user3 = em.find(User.class, user3Id);
+
+        Recipient recipient1 = em.find(Recipient.class, recipient1Id);
+        Recipient recipient2 = em.find(Recipient.class, recipient2Id);
+        Recipient recipient3 = em.find(Recipient.class, recipient3Id);
+
+        UserRoom userRoom1 = em.find(UserRoom.class, userRoom1Id);
+        UserRoom userRoom2 = em.find(UserRoom.class, userRoom2Id);
+        UserRoom userRoom3 = em.find(UserRoom.class, userRoom3Id);
+
+        Room room = em.find(Room.class, roomId);
+
+        Message message1 = em.find(Message.class, message1Id);
+        Message message2 = em.find(Message.class, message2Id);
+
+        user1.removeRecipient(recipient1);
+        user2.removeRecipient(recipient2);
+        user2.removeRecipient(recipient3);
+
+        user2.removeUserRoomFromUser(room);
+        user3.removeUserRoomFromUser(room);
+
+        em.remove(message1);
+        em.remove(message2);
+
+        em.remove(user1);
+        em.remove(user2);
+        em.remove(user3);
+        em.remove(room);
+
+        em.flush();
+        em.clear();
+        em.getTransaction().commit();
+
+        em.close();
 
     }
 
@@ -319,39 +323,21 @@ public class RecipientRepositoryTestSuite {
     public void testFindRecipientByMessageIdAndUserIdOrUserRoomId() {
         //Given
         //@Before prepared data
-        SessionFactory sf = emFactory.unwrap(SessionFactory.class);
+        em = emFactory.createEntityManager();
 
         //When
-        Session session = sf.openSession();
-        EntityTransaction tx = session.beginTransaction();
-        List<Recipient> foundRecipients1 = recipientRepository.findRecipientByMessageIdAndUserIdOrUserRoomId(message2Id, null, user1Id);
-        List<Recipient> foundRecipients2 = recipientRepository.findRecipientByMessageIdAndUserIdOrUserRoomId(message1Id, userRoom2Id.getRoomId(), null);
-        List<Recipient> foundRecipients3 = recipientRepository.findRecipientByMessageIdAndUserIdOrUserRoomId(message1Id, userRoom3Id.getRoomId(), null);
-        tx.commit();
-        session.close();
+        List<Recipient> foundRecipients1 = recipientRepository.findRecipientsByMessageIdAndUserIdOrUserRoomId_RoomId(message2Id, user1Id, null);
+        List<Recipient> foundRecipients2 = recipientRepository.findRecipientsByMessageIdAndUserIdOrUserRoomId_RoomId(message1Id, null, userRoom2Id.getRoomId());
 
+        em.getTransaction().begin();
+        String str1 = em.find(Recipient.class, foundRecipients1.get(0).getId()).getUser().getNick();
 
-        session = sf.openSession();
-        tx = session.beginTransaction();
-        session.load(foundRecipients1.get(0), recipient1Id);
-        String str1 = foundRecipients1.get(0).getUser().getNick();
-        tx.commit();
-        session.close();
+        String str2 = em.find(Recipient.class, foundRecipients2.get(0).getId()).getUserRoom().getRoom().getName();
+        String str3 = em.find(Recipient.class, foundRecipients2.get(0).getId()).getUserRoom().getUser().getNick();
 
-        session = sf.openSession();
-        tx = session.beginTransaction();
-        session.load(foundRecipients2.get(0), recipient2Id);
-        String str2 = foundRecipients2.get(0).getUserRoom().getRoom().getName();
-        String str3 = foundRecipients2.get(0).getUserRoom().getUser().getNick();
-        tx.commit();
-        session.close();
-
-        session = sf.openSession();
-        tx = session.beginTransaction();
-        session.load(foundRecipients3.get(0), recipient3Id);
-        String str4 = foundRecipients3.get(0).getUserRoom().getUser().getNick();
-        tx.commit();
-        session.close();
+        String str4 = em.find(Recipient.class, foundRecipients2.get(1).getId()).getUserRoom().getUser().getNick();
+        em.getTransaction().commit();
+        em.close();
 
         //Then
         Assert.assertEquals("ij", str1);
@@ -393,29 +379,22 @@ public class RecipientRepositoryTestSuite {
         User user3 = (User) userRepository.findAll().toArray()[2];
 
         em.getTransaction().begin();
-        Message readMessage2 = em.merge(message2);
-        User readUser3 = em.merge(user3);
+        em.merge(message2);
+        em.merge(user3);
+
 
         Recipient recipient = Recipient.builder()
                 .id(null)
                 .addedOn(LocalDate.now())
-                .message(readMessage2)
+                .message(message2)
                 .userRoom(null)
-                .user(readUser3)
+                .user(user3)
                 .build();
 
-        em.persist(recipient);
-        em.getTransaction().commit();
-
-        Long rId = recipient.getId();
-
-        em.getTransaction().begin();
-        Recipient readRecipient = em.merge(recipient);
-        em.remove(recipient);
+        recipientRepository.save(recipient);
         em.getTransaction().commit();
 
         //When
-        recipientRepository.save(readRecipient);
         int count = recipientRepository.findAll().size();
 
         //Then
@@ -423,10 +402,10 @@ public class RecipientRepositoryTestSuite {
 
         //CleanUp
         em.getTransaction().begin();
-        Recipient r = em.merge(readRecipient);
-        em.remove(r);
+
+        em.remove(em.contains(recipient) ? recipient : em.merge(recipient));
         em.getTransaction().commit();
-        em.close();
+//        em.close();
     }
 
     @Test
@@ -435,7 +414,7 @@ public class RecipientRepositoryTestSuite {
         //@Before prepared data
 
         //When
-        recipientRepository.deleteById(recipient2Id);
+        recipientRepository.deleteById(recipient3Id);
         int count = recipientRepository.findAll().size();
 
         //Then

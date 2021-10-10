@@ -5,6 +5,7 @@ import com.messenger.chat.domain.User;
 import com.messenger.chat.domain.UserRoom;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,31 +33,18 @@ public class RoomRepositoryTestSuite {
     private EntityManager em;
 
     @PersistenceUnit
-    public EntityManagerFactory emFactory = Persistence.createEntityManagerFactory("ChatPU");
+    private EntityManagerFactory emFactory;
 
-    @After
-    public void cleanUpRepository() {
-        roomRepository.deleteAll();
+    @Before
+    public void init() {
+        emFactory = Persistence.createEntityManagerFactory("ChatPU");
     }
 
-    @Test
-    public void testSaveRoom() {
-        //Given
-        Room room = Room.builder()
-                .id(null)
-                .name("Silence Service")
-                .roomUsersRooms(new HashSet<>())
-                .build();
-
-        roomRepository.save(room);
-
-        //When
-        Room roomSaved = (Room) roomRepository.findAll().toArray()[0];
-        String roomsName = roomSaved.getName();
-
-        //Then
-        Assert.assertEquals("Silence Service", roomsName);
-
+    @After
+    public void destroy() {
+        if (emFactory != null) {
+            emFactory.close();
+        }
     }
 
     @Test
@@ -87,8 +75,18 @@ public class RoomRepositoryTestSuite {
         //When
         int count = roomRepository.findAll().size();
 
+        Room readRoom1 = (Room) roomRepository.findAll().toArray()[0];
+        Room readRoom2 = (Room) roomRepository.findAll().toArray()[1];
+
+        Long rR1Id = readRoom1.getId();
+        Long rR2Id = readRoom2.getId();
+
         //Then
         Assert.assertEquals(2, count);
+
+        //CleanUp
+        roomRepository.deleteById(rR1Id);
+        roomRepository.deleteById(rR2Id);
 
     }
 
@@ -120,5 +118,65 @@ public class RoomRepositoryTestSuite {
         //Then
         Assert.assertEquals(readRoom, foundRoom);
 
+        //CLeanUp
+        roomRepository.deleteById(id);
+    }
+
+    @Test
+    public void testSaveRoom() {
+        //Given
+        Room room = Room.builder()
+                .id(null)
+                .name("Silence Service")
+                .roomUsersRooms(new HashSet<>())
+                .build();
+
+        roomRepository.save(room);
+
+        //When
+        Room roomSaved = (Room) roomRepository.findAll().toArray()[0];
+        Long roomId = roomSaved.getId();
+        String roomsName = roomSaved.getName();
+
+        //Then
+        Assert.assertEquals("Silence Service", roomsName);
+
+        //CleanUp
+        roomRepository.deleteById(roomId);
+
+    }
+
+    @Test
+    public void testDeleteRoomById() {
+
+        //Given
+        em = emFactory.createEntityManager();
+
+        em.getTransaction().begin();
+        Room room = Room.builder()
+                .id(null)
+                .name("Silence Service")
+                .roomUsersRooms(new HashSet<>())
+                .build();
+
+        em.persist(room);
+        em.getTransaction().commit();
+
+        //When
+        int roomsNumberBefore = roomRepository.findAll().size();
+
+        em.getTransaction().begin();
+        Room readRoom = em.merge(room);
+        Long id = readRoom.getId();
+        em.getTransaction().commit();
+        em.close();
+
+        roomRepository.deleteById(id);
+
+        int roomsNumberAfter = roomRepository.findAll().size();
+
+        //Then
+        Assert.assertEquals(1, roomsNumberBefore);
+        Assert.assertEquals(0, roomsNumberAfter);
     }
 }

@@ -17,12 +17,12 @@ import java.util.Optional;
 public interface RecipientRepository extends CrudRepository<Recipient, Long> {
 
     @Query(nativeQuery = true)
-    List<Recipient> findRecipientByMessageIdAndUserIdOrUserRoomId(
+    List<Recipient> findRecipientsByMessageIdAndUserIdOrUserRoomId_RoomId(
             @Param("messageId") Long messageId,
             @Nullable
-            @Param("roomId") Long roomId,
+            @Param("userId") Long userId,
             @Nullable
-            @Param("userId") Long userId
+            @Param("roomId") Long roomId
     );
 
 //    List<Recipient> findRecipientsByMessage(Message message);
@@ -36,7 +36,10 @@ public interface RecipientRepository extends CrudRepository<Recipient, Long> {
     @Override
     Recipient save(Recipient recipient);
 
-    @Modifying
+    /*@Modifying
     @Query("delete from Recipient where id = :id")
-    void deleteById(@Param("id") Long id);
+    void deleteById(@Param("id") Long id);*/
+
+    @Override
+    void deleteById(Long id);
 }

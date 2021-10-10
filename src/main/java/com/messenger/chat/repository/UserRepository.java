@@ -19,21 +19,19 @@ public interface UserRepository extends CrudRepository<User, Long> {
     List<User> findByLoggedInTrue();
 
     @Query(nativeQuery = true)
-    List<User> findFriends(@Param("id")Long id);
+    List<User> findFriends(@Param("id") Long id);
 
     @Modifying
     @Query(nativeQuery = true)
-    void addUsersFriend(@Param("userId") Long userId,
-                      @Param("friendId") Long friendId);
+    void addUsersFriend(
+            @Param("userId") Long userId,
+            @Param("friendId") Long friendId);
 
     @Modifying
     @Query(nativeQuery = true)
-    void deleteUsersFriend(@Param("userId") Long userId,
-                        @Param("friendId") Long friendId);
-
-    @Modifying
-    @Query(nativeQuery = true)
-    void deleteUserById(@Param("userId") Long userId);
+    void deleteUsersFriend(
+            @Param("userId") Long userId,
+            @Param("friendId") Long friendId);
 
     @Override
     List<User> findAll();

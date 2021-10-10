@@ -1,5 +1,6 @@
 package com.messenger.chat.controller;
 
+import com.messenger.chat.domain.Room;
 import com.messenger.chat.domain.RoomDto;
 import com.messenger.chat.mapper.RoomMapper;
 import com.messenger.chat.service.RoomService;

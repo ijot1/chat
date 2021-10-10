@@ -36,6 +36,10 @@ dependencies {
     // https://mvnrepository.com/artifact/org.hibernate/hibernate-entitymanager
     implementation group: 'org.hibernate', name: 'hibernate-entitymanager', version: '5.4.31.Final'
 
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12
+    //testImplementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.32'
+
+
     runtimeOnly'com.h2database:h2'
 
     annotationProcessor 'org.projectlombok:lombok'

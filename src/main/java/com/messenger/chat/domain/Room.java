@@ -1,14 +1,12 @@
 package com.messenger.chat.domain;
 
 import lombok.*;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.NaturalId;
-import org.hibernate.annotations.NaturalIdCache;
-import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,7 +26,7 @@ public class Room implements Serializable {
     private String name;
 
     @OneToMany(mappedBy = "room",
-            cascade = {CascadeType.ALL},
+            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
             orphanRemoval = true)
     private Set<UserRoom> roomUsersRooms = new HashSet<>();
 
@@ -38,17 +36,15 @@ public class Room implements Serializable {
 
     public void addUserRoomToRoom(User user) {
         UserRoom userRoom = new UserRoom(user, this);
-        if (!roomUsersRooms.contains(userRoom)) {
-            roomUsersRooms.add(userRoom);
-            user.getUserUsersRooms().add(userRoom);
-        }
+        roomUsersRooms.add(userRoom);
+        user.getUserUsersRooms().add(userRoom);
     }
 
     public void removeUserRoomFromRoom(User user) {
         Iterator<UserRoom> iterator = roomUsersRooms.iterator();
         while (iterator.hasNext()) {
             UserRoom ur = iterator.next();
-            if (ur.getUser().equals(user) && ur.getRoom().equals(this) ) {
+            if (ur.getUser().equals(user) && ur.getRoom().equals(this)) {
                 iterator.remove();
                 ur.getUser().getUserUsersRooms().remove(ur);
                 ur.setUser(null);
@@ -71,12 +67,12 @@ public class Room implements Serializable {
         if (this == o) return true;
         if (o == null || !(o instanceof Room)) return false;
 
-        final Room room = (Room) o;
-            return Objects.equals(getName(), room.getName());
+        Room room = (Room) o;
+        return id != null && id.equals(room.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getName());
+        return getClass().hashCode();
     }
 }

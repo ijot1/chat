@@ -1,5 +1,7 @@
 package com.messenger.chat.repository;
 
+import com.messenger.chat.domain.Room;
+import com.messenger.chat.domain.User;
 import com.messenger.chat.domain.UserRoom;
 import com.messenger.chat.domain.UserRoomId;
 import org.springframework.data.jpa.repository.Query;
@@ -28,4 +30,6 @@ public interface UserRoomRepository extends CrudRepository<UserRoom, UserRoomId>
 
     @Override
     void delete(UserRoom userRoom);
+
+    void deleteByUserAndRoom(User user, Room room);
 }

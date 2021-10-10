@@ -4,18 +4,16 @@ import com.messenger.chat.domain.Room;
 import com.messenger.chat.domain.User;
 import com.messenger.chat.domain.UserRoom;
 import com.messenger.chat.domain.UserRoomId;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceUnit;
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.HashSet;
 
@@ -33,130 +31,39 @@ public class UserRepositoryTestSuite {
     private EntityManager em;
 
     @PersistenceUnit
-    public EntityManagerFactory emFactory = Persistence.createEntityManagerFactory("ChatPU");
+    private EntityManagerFactory emFactory;
+
+    @Before
+    public void init() {
+        emFactory = Persistence.createEntityManagerFactory("ChatPU");
+    }
 
     @After
-    public void cleanUpRepository() {
-        userRepository.deleteAll();
+    public void destroy() {
+        if (emFactory != null) {
+            emFactory.close();
+        }
+    }
+
+    private void cleanUpTwoUsers() {
+        User user1 = (User) userRepository.findAll().toArray()[0];
+        User user2 = (User) userRepository.findAll().toArray()[1];
+
+        userRepository.delete(user1);
+        userRepository.delete(user2);
+    }
+
+    private void cleanUpOneUser() {
+        User user = (User) userRepository.findAll().toArray()[0];
+
+        userRepository.delete(user);
     }
 
     @Test
-    public void testSaveUser() {
+    public void testFindLoggedInUsers() {
         //Given
         em = emFactory.createEntityManager();
-
         em.getTransaction().begin();
-        User user = User.builder()
-                .id(null)
-                .nick("mz")
-                .name("")
-                .sex('W')
-                .location("Katowice")
-                .createdOn(LocalDate.now())
-                .password("Zaq12wsx")
-                .loggedIn(true)
-                .messages(new HashSet<>())
-                .recipients(new HashSet<>())
-                .userUsersRooms(new HashSet<>())
-                .friends(new HashSet<>())
-                .build();
-
-        em.persist(user);
-        em.getTransaction().commit();
-
-        em.getTransaction().begin();
-        Room room = Room.builder()
-                .id(null)
-                .name("Silence Service")
-                .roomUsersRooms(new HashSet<>())
-                .build();
-
-        em.persist(room);
-        em.getTransaction().commit();
-
-        em.getTransaction().begin();
-        UserRoom userRoom = UserRoom.builder()
-                .id(new UserRoomId(user.getId(), room.getId()))
-                .user(user)
-                .room(room)
-                .addedOn(LocalDate.now())
-                .recipients(new HashSet<>())
-                .build();
-
-        em.persist(room);
-        em.getTransaction().commit();
-
-        //When
-        em.getTransaction().begin();
-        User savedUser = em.merge(user);
-        Room savedRoom = em.merge(room);
-        savedUser.addUserRoomToUser(savedRoom);
-
-        em.getTransaction().commit();
-        em.close();
-
-        savedUser.setName("Milena-Zanik");
-        user = userRepository.save(savedUser);
-
-        String str = savedUser.getName();
-
-        //Then
-        Assert.assertEquals("Milena-Zanik", str);
-
-    }
-
-    @Test
-    public void testFindUsers() {
-        //Given
-        User user1 = User.builder()
-                .id(null)
-                .nick("ij")
-                .name("Irena-Janik")
-                .sex('W')
-                .location("Bangalore")
-                .createdOn(LocalDate.now())
-                .password("Zaq12wsx")
-                .loggedIn(true)
-                .messages(new HashSet<>())
-                .recipients(new HashSet<>())
-                .userUsersRooms(new HashSet<>())
-                .friends(new HashSet<>())
-                .build();
-
-        User user2 = User.builder()
-                .id(null)
-                .nick("jk")
-                .name("Janina-Kranik")
-                .sex('W')
-                .location("Bialsk Podlaski")
-                .createdOn(LocalDate.now())
-                .password("Zaq12wsx")
-                .loggedIn(true)
-                .messages(new HashSet<>())
-                .recipients(new HashSet<>())
-                .userUsersRooms(new HashSet<>())
-                .friends(new HashSet<>())
-                .build();
-
-        userRepository.save(user1);
-        userRepository.save(user2);
-
-        //When
-        int count = userRepository.findAll().size();
-
-        user1 = (User) userRepository.findAll().toArray()[0];
-        user2 = (User) userRepository.findAll().toArray()[1];
-
-
-        //Then
-        Assert.assertEquals(2, count);
-
-    }
-
-    @Test
-    public void testAddUsersFriend() {
-        //Given
-        EntityManager em = emFactory.createEntityManager();
 
         User user1 = User.builder()
                 .id(null)
@@ -173,6 +80,10 @@ public class UserRepositoryTestSuite {
                 .friends(new HashSet<>())
                 .build();
 
+        em.persist(user1);
+        em.getTransaction().commit();
+
+        em.getTransaction().begin();
         User user2 = User.builder()
                 .id(null)
                 .nick("jk")
@@ -188,36 +99,46 @@ public class UserRepositoryTestSuite {
                 .friends(new HashSet<>())
                 .build();
 
-        userRepository.save(user1);
-        userRepository.save(user2);
+        em.persist(user2);
+        em.getTransaction().commit();
 
-        userRepository.addUsersFriend(user1.getId(), user2.getId());
-
-        user1 = (User) userRepository.findAll().toArray()[0];
-        user2 = (User) userRepository.findAll().toArray()[1];
-
-        //When
         em.getTransaction().begin();
+        User user3 = User.builder()
+                .id(null)
+                .nick("kk")
+                .name("Karina-Kranik")
+                .sex('W')
+                .location("Rytro")
+                .createdOn(LocalDate.now())
+                .password("Zaq12wsx")
+                .loggedIn(false)
+                .messages(new HashSet<>())
+                .recipients(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
+                .friends(new HashSet<>())
+                .build();
 
-        User readUser1 = em.merge(user1);
-        User readUser2 = em.merge(user2);
-        int user1FriendsCount = readUser1.getFriends().size();
-
-        readUser1.removeFriend(readUser2);
+        em.persist(user3);
         em.getTransaction().commit();
 
         if (em != null && em.isOpen())
             em.close(); // You create it, you close it!
 
-        //Then
-        Assert.assertEquals(1, user1FriendsCount);
+        //When
+        int count = userRepository.findByLoggedInTrue().size();
 
+        //Then
+        Assert.assertEquals(2, count);
+
+        //CleanUp
+        cleanUpTwoUsers();
+        cleanUpOneUser();
     }
 
     @Test
     public void testFindFriends() {
         //Given
-        EntityManager em = emFactory.createEntityManager();
+        em = emFactory.createEntityManager();
 
         em.getTransaction().begin();
         User user1 = User.builder()
@@ -312,10 +233,79 @@ public class UserRepositoryTestSuite {
         user3.removeFriend(user1);
         user3.removeFriend(user2);
 
+        em.remove(user1);
+        em.remove(user2);
+        em.remove(user3);
+
         em.getTransaction().commit();
 
         if (em != null && em.isOpen())
             em.close(); // You create it, you close it!
+
+
+    }
+
+    @Test
+    public void testAddUsersFriend() {
+        //Given
+        em = emFactory.createEntityManager();
+
+        User user1 = User.builder()
+                .id(null)
+                .nick("ij")
+                .name("Irena-Janik")
+                .sex('W')
+                .location("Bangalore")
+                .createdOn(LocalDate.now())
+                .password("Zaq12wsx")
+                .loggedIn(true)
+                .messages(new HashSet<>())
+                .recipients(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
+                .friends(new HashSet<>())
+                .build();
+
+        User user2 = User.builder()
+                .id(null)
+                .nick("jk")
+                .name("Janina-Kranik")
+                .sex('W')
+                .location("Bialsk Podlaski")
+                .createdOn(LocalDate.now())
+                .password("Zaq12wsx")
+                .loggedIn(true)
+                .messages(new HashSet<>())
+                .recipients(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
+                .friends(new HashSet<>())
+                .build();
+
+        userRepository.save(user1);
+        userRepository.save(user2);
+
+        userRepository.addUsersFriend(user1.getId(), user2.getId());
+
+        user1 = (User) userRepository.findAll().toArray()[0];
+        user2 = (User) userRepository.findAll().toArray()[1];
+
+        //When
+        em.getTransaction().begin();
+
+        User readUser1 = em.merge(user1);
+        User readUser2 = em.merge(user2);
+        int user1FriendsCount = readUser1.getFriends().size();
+
+        readUser1.removeFriend(readUser2);
+        em.getTransaction().commit();
+
+        if (em != null && em.isOpen())
+            em.close(); // You create it, you close it!
+
+        //Then
+        Assert.assertEquals(1, user1FriendsCount);
+
+        //CleanUp
+        cleanUpTwoUsers();
 
     }
 
@@ -323,7 +313,7 @@ public class UserRepositoryTestSuite {
     public void testDeleteUsersFriend() {
 
         //Given
-        EntityManager em = emFactory.createEntityManager();
+        em = emFactory.createEntityManager();
 
         em.getTransaction().begin();
         User user1 = User.builder()
@@ -409,14 +399,14 @@ public class UserRepositoryTestSuite {
         //Then
         Assert.assertEquals(0, fNr);
 
+        //CleanUp
+        cleanUpTwoUsers();
+        cleanUpOneUser();
     }
 
     @Test
-    public void testFindLoggedInUsers() {
+    public void testFindUsers() {
         //Given
-        EntityManager em = emFactory.createEntityManager();
-
-        em.getTransaction().begin();
         User user1 = User.builder()
                 .id(null)
                 .nick("ij")
@@ -432,10 +422,6 @@ public class UserRepositoryTestSuite {
                 .friends(new HashSet<>())
                 .build();
 
-        em.persist(user1);
-        em.getTransaction().commit();
-
-        em.getTransaction().begin();
         User user2 = User.builder()
                 .id(null)
                 .nick("jk")
@@ -451,43 +437,23 @@ public class UserRepositoryTestSuite {
                 .friends(new HashSet<>())
                 .build();
 
-        em.persist(user2);
-        em.getTransaction().commit();
-
-        em.getTransaction().begin();
-        User user3 = User.builder()
-                .id(null)
-                .nick("kk")
-                .name("Karina-Kranik")
-                .sex('W')
-                .location("Rytro")
-                .createdOn(LocalDate.now())
-                .password("Zaq12wsx")
-                .loggedIn(false)
-                .messages(new HashSet<>())
-                .recipients(new HashSet<>())
-                .userUsersRooms(new HashSet<>())
-                .friends(new HashSet<>())
-                .build();
-
-        em.persist(user3);
-        em.getTransaction().commit();
-
-        if (em != null && em.isOpen())
-            em.close(); // You create it, you close it!
+        userRepository.save(user1);
+        userRepository.save(user2);
 
         //When
-        int count = userRepository.findByLoggedInTrue().size();
+        int count = userRepository.findAll().size();
 
         //Then
         Assert.assertEquals(2, count);
 
+        //CleanUp
+        cleanUpTwoUsers();
     }
 
     @Test
     public void testFindUserById() {
         //Given
-        EntityManager em = emFactory.createEntityManager();
+        em = emFactory.createEntityManager();
 
         em.getTransaction().begin();
         User user1 = User.builder()
@@ -558,6 +524,84 @@ public class UserRepositoryTestSuite {
         //Then
         Assert.assertEquals("kk", str);
 
+        //CleanUp
+        cleanUpTwoUsers();
+        cleanUpOneUser();
+    }
+
+    @Test
+    public void testSaveUser() {
+        //Given
+        em = emFactory.createEntityManager();
+
+        em.getTransaction().begin();
+        User user = User.builder()
+                .id(null)
+                .nick("mz")
+                .name("")
+                .sex('W')
+                .location("Katowice")
+                .createdOn(LocalDate.now())
+                .password("Zaq12wsx")
+                .loggedIn(true)
+                .messages(new HashSet<>())
+                .recipients(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
+                .friends(new HashSet<>())
+                .build();
+
+        em.persist(user);
+        em.getTransaction().commit();
+
+        em.getTransaction().begin();
+        Room room = Room.builder()
+                .id(null)
+                .name("Silence Service")
+                .roomUsersRooms(new HashSet<>())
+                .build();
+
+        em.persist(room);
+        em.getTransaction().commit();
+
+        em.getTransaction().begin();
+        UserRoom userRoom = UserRoom.builder()
+                .id(new UserRoomId(user.getId(), room.getId()))
+                .user(user)
+                .room(room)
+                .addedOn(LocalDate.now())
+                .recipients(new HashSet<>())
+                .build();
+
+        em.persist(room);
+        em.getTransaction().commit();
+
+        //When
+        em.getTransaction().begin();
+        User savedUser = em.merge(user);
+        Long userId = savedUser.getId();
+        Room savedRoom = em.merge(room);
+        savedUser.addUserRoomToUser(savedRoom);
+
+        em.getTransaction().commit();
+
+        savedUser.setName("Milena-Zanik");
+        user = userRepository.save(savedUser);
+
+        String str = savedUser.getName();
+
+        //Then
+        Assert.assertEquals("Milena-Zanik", str);
+
+        //CleanUp
+        em.getTransaction().begin();
+        Room aRoom = em.find(Room.class, savedRoom.getId());
+        em.refresh(aRoom);
+        em.remove(aRoom);
+
+        em.getTransaction().commit();
+        em.close();
+        cleanUpOneUser();
+
     }
 
     @Test
@@ -595,12 +639,13 @@ public class UserRepositoryTestSuite {
         if (em != null && em.isOpen())
             em.close(); // You create it, you close it!
 
+        int countBefore = userRepository.findAll().size();
         userRepository.deleteById(uId);
 
-        int count = userRepository.findAll().size();
+        int countAfter = userRepository.findAll().size();
 
         //Then
-        Assert.assertEquals(0, count);
-
+        Assert.assertEquals(1, countBefore);
+        Assert.assertEquals(0, countAfter);
     }
 }

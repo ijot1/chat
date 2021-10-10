@@ -1,5 +1,6 @@
 package com.messenger.chat.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
@@ -15,6 +16,7 @@ import java.util.Set;
 @Setter
 @Builder
 @Entity
+//@JsonIgnoreProperties(value = {"recipientSet"})
 @Table(name = "MESSAGES")
 public class Message implements Serializable {
 
@@ -29,18 +31,17 @@ public class Message implements Serializable {
     @Column(name = "CREATED_ON"/*, nullable = false*/)
     private LocalDate dateCreated;
 
-    @ManyToOne(targetEntity = User.class,
-            cascade = CascadeType.PERSIST,
-            fetch = FetchType.LAZY)            //default for ToOne EAGER
+    @ManyToOne(/*targetEntity = User.class,*/
+            cascade = CascadeType.ALL,  //cascade = CascadeType.PERSIST,
+            fetch = FetchType.LAZY)     //default for ToOne EAGER
     @NotNull
     @JoinColumn(name = "CREATED_BY")
     private User creator;
 
-    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    /*@JoinColumn(name = "MESSAGE_ID",    //"MESSAGE_ID"
-            insertable = false,
-            updatable = false
-    )*/
+    @OneToMany(mappedBy = "message",
+            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
+            fetch = FetchType.LAZY,
+            orphanRemoval = true)
     private Set<Recipient> recipientSet;
 
     public Message(String messageText) {
@@ -84,14 +85,11 @@ public class Message implements Serializable {
         if (this == o) return true;
         if (!(o instanceof Message)) return false;
         Message message = (Message) o;
-        return id.equals(message.id) &&
-                messageText.equals(message.messageText) &&
-                dateCreated.equals(message.dateCreated) &&
-                creator.equals(message.creator);
+        return id != null && id.equals(message.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, messageText, dateCreated, creator);
+        return Objects.hash(messageText, dateCreated, creator);
     }
 }

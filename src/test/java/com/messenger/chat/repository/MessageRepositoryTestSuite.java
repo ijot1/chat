@@ -25,41 +25,6 @@ public class MessageRepositoryTestSuite {
     MessageRepository messageRepository;
 
     @Test
-    public void testSaveMessage() {
-
-        //Given
-        User user = User.builder()
-                .nick("ijot")
-                .name("Irena-Janik")
-                .sex('W')
-                .location("Bangalore")
-                .createdOn(LocalDate.now())
-                .password("Zaq12wsx")
-                .loggedIn(true)
-                .messages(new HashSet<>())
-                .recipients(new HashSet<>())
-                .userUsersRooms(new HashSet<>())
-                .friends(new HashSet<>())
-                .build();
-
-        Message message = Message.builder()
-                .messageText("Message #1 text")
-                .dateCreated(LocalDate.now())
-                .creator(user)
-                .recipientSet(new HashSet<>())
-                .build();
-
-        user.addMessage(message);
-
-        //When
-        String str = messageRepository.save(message).getMessageText();
-
-        //Then
-        Assert.assertEquals("Message #1 text", str);
-
-    }
-
-    @Test
     public void testFindAllMessages() {
 
         //Given
@@ -145,6 +110,41 @@ public class MessageRepositoryTestSuite {
 
         //Then
         Assert.assertEquals(message2, readMessage);
+
+    }
+
+    @Test
+    public void testSaveMessage() {
+
+        //Given
+        User user = User.builder()
+                .nick("ijot")
+                .name("Irena-Janik")
+                .sex('W')
+                .location("Bangalore")
+                .createdOn(LocalDate.now())
+                .password("Zaq12wsx")
+                .loggedIn(true)
+                .messages(new HashSet<>())
+                .recipients(new HashSet<>())
+                .userUsersRooms(new HashSet<>())
+                .friends(new HashSet<>())
+                .build();
+
+        Message message = Message.builder()
+                .messageText("Message #1 text")
+                .dateCreated(LocalDate.now())
+                .creator(user)
+                .recipientSet(new HashSet<>())
+                .build();
+
+        user.addMessage(message);
+
+        //When
+        String str = messageRepository.save(message).getMessageText();
+
+        //Then
+        Assert.assertEquals("Message #1 text", str);
 
     }
 

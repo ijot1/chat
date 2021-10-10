@@ -1,6 +1,6 @@
 package com.messenger.chat.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
@@ -8,9 +8,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.Set;
-
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,14 +30,10 @@ import java.util.Set;
         @NamedNativeQuery(
                 name = "User.deleteUsersFriend",
                 query = "delete from users_friends where friend_id = :friendId and user_id = :userId",  //where friend_id = :friendId and user_id = :userId
-                resultClass = User.class),
-        @NamedNativeQuery(
-                name = "User.deleteUserById",
-                query = "delete from users where user_id = ?",  //where friend_id = :friendId and user_id = :userId
                 resultClass = User.class)
 })
 
-//@JsonIgnoreProperties(value = {"messages", "recipients", "friends", "senders"})
+@JsonIgnoreProperties(value = {"messages", "recipients", "userUsersRooms", "friends"})
 @Table(name = "USERS")
 public class User implements Serializable {
 
@@ -71,26 +65,22 @@ public class User implements Serializable {
 
     @OneToMany(mappedBy = "creator",
             fetch = FetchType.EAGER, //LAZY
-            cascade = CascadeType.PERSIST,  //ALL
+            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
             orphanRemoval = true)
-    @JsonIgnore
     private Set<Message> messages;
 
     @OneToMany(mappedBy = "user",
-            cascade = CascadeType.ALL,
-            fetch = FetchType.EAGER, //LAZY
+            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
+            fetch = FetchType.LAZY,
             orphanRemoval = true)
-//    @JsonIgnore
     private Set<Recipient> recipients;
 
     @OneToMany(mappedBy = "user",
-            cascade = CascadeType.ALL,
-            fetch = FetchType.EAGER,
+            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
             orphanRemoval = true)
     private Set<UserRoom> userUsersRooms = new HashSet<>();
 
-    @ManyToMany(cascade = CascadeType.ALL/*{CascadeType.MERGE, CascadeType.PERSIST, CascadeType.DETACH}*/)
-    @JsonIgnore
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(name = "users_friends",
             joinColumns = {@JoinColumn(name = "USER_ID")},
             inverseJoinColumns = {@JoinColumn(name = "FRIEND_ID")})
@@ -105,7 +95,7 @@ public class User implements Serializable {
     }
 
     void addMessage(Message message, boolean set) {
-        if (message != null && !getMessages().contains(message)) {
+        if (message != null) {
             getMessages().add(message);
         }
         if (set) {
@@ -114,7 +104,7 @@ public class User implements Serializable {
     }
 
     public void removeMessage(Message message) {
-        messages.remove(message);
+        this.messages.remove(message);
         message.setCreator(null);
     }
 
@@ -123,7 +113,7 @@ public class User implements Serializable {
     }
 
     void addRecipient(Recipient recipientToAdd, boolean set) {
-        if (recipientToAdd != null && !getRecipients().contains(recipientToAdd)) {
+        if (recipientToAdd != null) {
             getRecipients().add(recipientToAdd);
             if (set) {
                 recipientToAdd.setUser(this, false);
@@ -144,10 +134,8 @@ public class User implements Serializable {
 
     public void addUserRoomToUser(Room room) {
         UserRoom userRoom = new UserRoom(this, room);
-        if (!userUsersRooms.contains(userRoom)) {
-            userUsersRooms.add(userRoom);
-            room.getRoomUsersRooms().add(userRoom);
-        }
+        userUsersRooms.add(userRoom);
+        room.getRoomUsersRooms().add(userRoom);
     }
 
     public void removeUserRoomFromUser(Room room) {
@@ -170,7 +158,7 @@ public class User implements Serializable {
     public void removeFriend(User friendToRemove) {
         Iterator<User> i = friends.iterator();
         while (i.hasNext()) {
-            User u = (User) i.next();
+            User u = i.next();
             if (u == friendToRemove) {
                 i.remove();
             }
@@ -193,15 +181,12 @@ public class User implements Serializable {
         if (this == o) return true;
         if (!(o instanceof User)) return false;
 
-        final User user = (User) o;
-        if (id != null && user.getId() != null) {
-            return id.equals(user.getId());
-        }
-        return false;
+        User user = (User) o;
+        return id != null && id.equals(user.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nick, name, sex, location);
+        return getClass().hashCode();
     }
 }

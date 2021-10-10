@@ -26,19 +26,21 @@ public class UserRoom implements Serializable {
     private UserRoomId id;
 
     @MapsId("USER_ID")
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "USER_ID", insertable = false, updatable = false)
     private User user;
 
     @MapsId("ROOM_ID")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}/*CascadeType.ALL*/)
     @JoinColumn(name = "ROOM_ID", insertable = false, updatable = false)
     private Room room;
 
     @Column(name = "ADDED_ON", updatable = false)
     private LocalDate addedOn;
 
-    @OneToMany(mappedBy = "userRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "userRoom",
+            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
+            orphanRemoval = true)
     private Set<Recipient> recipients;
 
     public UserRoom(User user, Room room) {
@@ -49,14 +51,14 @@ public class UserRoom implements Serializable {
         this.id = new UserRoomId(user.getId(), room.getId());
     }
 
-    public void addMessageRecipient(UserRoom userRoom) {
-        Recipient recipient = new Recipient();
-        recipient.setUserRoom(this);
+    public void addMessageRecipient(Recipient recipient) {
         this.recipients.add(recipient);
+        recipient.setUserRoom(this);
     }
 
     public void removeMessageRecipient(Recipient recipient) {
         this.recipients.remove(recipient);
+        recipient.setUserRoom(null);
     }
 
     @Override

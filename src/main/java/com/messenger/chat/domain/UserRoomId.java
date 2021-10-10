@@ -1,7 +1,9 @@
 package com.messenger.chat.domain;
 
-import lombok.*;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -22,7 +24,7 @@ public class UserRoomId implements Serializable {
     protected Long roomId;
 
     @Override
-    public String   toString() {
+    public String toString() {
         return "UserRoomId{" +
                 "userId=" + userId +
                 ", roomId=" + roomId +
@@ -35,12 +37,12 @@ public class UserRoomId implements Serializable {
         if (!(o instanceof UserRoomId)) return false;
         UserRoomId that = (UserRoomId) o;
         return Objects.equals(userId, that.userId) &&
-               Objects.equals(roomId, that.roomId);
+                Objects.equals(roomId, that.roomId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, roomId);
+        return getClass().hashCode();
     }
 }
 

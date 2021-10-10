@@ -6,8 +6,8 @@ import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.Objects;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,29 +18,38 @@ import java.util.Objects;
 @EitherOr
 @Table(name = "RECIPIENTS")
 @NamedNativeQuery(
-        name = "findRecipientByMessageIdAndUserIdOrUserRoomId",
-        query = "SELECT r.* FROM recipients r where r.message_id = :message_id and ((r.user_id = :user_id and r.id_room is null or r.id_user is null) or (r.id_room = :room_id and r.user_id is null))",
+        /*name = "findRecipientByMessageIdAndUserIdOrUserRoomId",*/
+        name = "findRecipientsByMessageIdAndUserIdOrUserRoomId_RoomId",
+        /*query = "SELECT r.* FROM recipients r where r.message_id = :message_id " +
+                "and ((r.user_id = :user_id " +
+                "and (r.id_room is null or r.id_user is null)) " +
+                "or (r.user_id is null and r.id_room = :room_id))",*/
+        query = "SELECT r.* FROM recipients r where r.message_id = :messageId " +
+                "and ((r.user_id = :userId " +
+                "and (r.id_room is null or r.id_user is null)) " +
+                "or (r.user_id is null and r.id_room = :roomId))",
 
         resultClass = Recipient.class
 )
 
-public class Recipient {
+public class Recipient implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "RECIPIENT_ID")
     private Long id;
 
     @Column(name = "ADDED_ON", updatable = false)
     @NotNull
     private LocalDate addedOn;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)   //, fetch = FetchType.LAZY
+    @ManyToOne(
+            cascade = CascadeType.MERGE/*CascadeType.ALL*/,
+            fetch = FetchType.LAZY)
     @JoinColumn(name = "MESSAGE_ID")
     private Message message;
 
     @Nullable
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)   //, fetch = FetchType.LAZY
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumns({
             @JoinColumn(name = "id_user", referencedColumnName = "USER_ID"),
             @JoinColumn(name = "id_room", referencedColumnName = "ROOM_ID")
@@ -84,6 +93,6 @@ public class Recipient {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return getClass().hashCode();
     }
 }

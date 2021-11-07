@@ -1,7 +1,5 @@
 package com.messenger.chat.controller;
 
-import com.messenger.chat.domain.Room;
-import com.messenger.chat.domain.User;
 import com.messenger.chat.domain.UserRoomDto;
 import com.messenger.chat.mapper.UserRoomMapper;
 import com.messenger.chat.service.UserRoomService;
@@ -28,7 +26,7 @@ public class UserRoomController {
 
     @GetMapping(value = "/usersRooms/{userId}/{roomId}")
     public UserRoomDto getUserRoom(@PathVariable Long userId, @PathVariable Long roomId) {
-        return userRoomMapper.mapToUserRoomDto(userRoomService.retrieveUserRoomByIds(userId, roomId));
+        return userRoomMapper.mapToUserRoomDto(userRoomService.retrieveUserRoom(userId, roomId));
     }
 
     @GetMapping(value = "/usersRooms/{roomId}")
@@ -41,8 +39,13 @@ public class UserRoomController {
         userRoomService.create(userRoomDto);
     }
 
-    @DeleteMapping(value = "/usersRooms", consumes = APPLICATION_JSON_VALUE)
+    /*@DeleteMapping(value = "/usersRooms", consumes = APPLICATION_JSON_VALUE)
     public void deleteUserRoom(@RequestBody UserRoomDto userRoomDto) {
         userRoomService.deleteUserRoomByBody(userRoomDto);
+    }*/
+
+    @DeleteMapping(value = "/usersRooms/{userId}/{roomId}", consumes = APPLICATION_JSON_VALUE)
+    public void deleteUserRoom(@PathVariable Long userId, @PathVariable Long roomId) {
+        userRoomService.removeUserRoom(userId, roomId);
     }
 }

@@ -26,12 +26,12 @@ public class UserRoom implements Serializable {
     private UserRoomId id;
 
     @MapsId("USER_ID")
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", insertable = false, updatable = false)
     private User user;
 
     @MapsId("ROOM_ID")
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}/*CascadeType.ALL*/)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ROOM_ID", insertable = false, updatable = false)
     private Room room;
 
@@ -39,8 +39,7 @@ public class UserRoom implements Serializable {
     private LocalDate addedOn;
 
     @OneToMany(mappedBy = "userRoom",
-            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
-            orphanRemoval = true)
+            cascade = CascadeType.PERSIST)
     private Set<Recipient> recipients;
 
     public UserRoom(User user, Room room) {
@@ -68,7 +67,6 @@ public class UserRoom implements Serializable {
                 ", addedOn=" + addedOn +
                 ", user=" + user +
                 ", room=" + room +
-                /*", messageRecipients=" + recipients +*/
                 '}';
     }
 

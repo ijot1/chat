@@ -64,18 +64,18 @@ public class User implements Serializable {
     private boolean loggedIn;
 
     @OneToMany(mappedBy = "creator",
-            fetch = FetchType.EAGER, //LAZY
+            fetch = FetchType.LAZY,
             cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
             orphanRemoval = true)
     private Set<Message> messages;
 
     @OneToMany(mappedBy = "user",
-            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
             fetch = FetchType.LAZY,
-            orphanRemoval = true)
+            cascade = CascadeType.PERSIST)
     private Set<Recipient> recipients;
 
     @OneToMany(mappedBy = "user",
+            fetch = FetchType.LAZY,
             cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
             orphanRemoval = true)
     private Set<UserRoom> userUsersRooms = new HashSet<>();

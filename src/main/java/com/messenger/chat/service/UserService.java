@@ -8,8 +8,10 @@ import com.messenger.chat.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @EitherOrId
@@ -17,6 +19,13 @@ import java.util.List;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EntityManager em;
+
+    @PersistenceUnit
+    public EntityManagerFactory emFactory = Persistence.createEntityManagerFactory("ChatPU");
+
 
     public List<User> retrieveLoggedInUsers() {
         return  userRepository.findByLoggedInTrue();
@@ -47,6 +56,23 @@ public class UserService {
     }
 
     public void deleteUserById(Long id) {
+        em = emFactory.createEntityManager();
+        em.getTransaction().begin();
+
+        User user = em.find(User.class, id);
+        user.getFriends().clear();
+
+        Query q = em.createNativeQuery("select * from users u", User.class);
+        List<User> users = q.getResultList();
+        for (User u : users) {
+            if (u.getFriends().contains(user)) {
+                u.getFriends().remove(user);
+            }
+        }
+        em.flush();
+        em.getTransaction().commit();
+        em.close();
+
         userRepository.deleteById(id);
     }
 }

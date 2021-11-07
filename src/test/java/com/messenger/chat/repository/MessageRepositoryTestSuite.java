@@ -60,6 +60,7 @@ public class MessageRepositoryTestSuite {
         user.addMessage(message1);
         user.addMessage(message2);
         //When
+        userRepository.save(user);
         messageRepository.save(message1);
         messageRepository.save(message2);
         int count = messageRepository.findAll().size();
@@ -104,12 +105,17 @@ public class MessageRepositoryTestSuite {
 
         user.addMessage(message1);
         user.addMessage(message2);
+        userRepository.save(user);
+
         //When
         messageRepository.save(message1);
-        Message readMessage = messageRepository.findById(message2.getId()).orElse(new Message("No such Message"));
+        messageRepository.save(message2);
+        Message readMessage1 = messageRepository.findById(message1.getId()).orElse(new Message("No such Message"));
+        Message readMessage2 = messageRepository.findById(message2.getId()).orElse(new Message("No such Message"));
 
         //Then
-        Assert.assertEquals(message2, readMessage);
+        Assert.assertEquals(message1, readMessage1);
+        Assert.assertEquals(message2, readMessage2);
 
     }
 
@@ -139,6 +145,7 @@ public class MessageRepositoryTestSuite {
                 .build();
 
         user.addMessage(message);
+        userRepository.save(user);
 
         //When
         String str = messageRepository.save(message).getMessageText();
@@ -182,6 +189,7 @@ public class MessageRepositoryTestSuite {
                 .build();
 
         //When
+        userRepository.save(user);
         messageRepository.save(message1);
         Long mId = messageRepository.save(message2).getId();
         messageRepository.deleteById(mId);

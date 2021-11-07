@@ -45,7 +45,7 @@ public class UserRoomService {
         return userRoomRepository.findAll();
     }
 
-    public UserRoom retrieveUserRoomByIds(final Long userId, final Long roomId)
+    public UserRoom retrieveUserRoom(final Long userId, final Long roomId)
             throws ResourceNotFoundException {
         Optional<UserRoom> foundUserRoom = userRoomRepository.findAll().stream()
                 .filter(el -> (el.getId().getUserId() == userId
@@ -65,36 +65,19 @@ public class UserRoomService {
         return userRoomRepository.save(userRoom);
     }
 
-    public void deleteUserRoomByBody(final UserRoomDto userRoomDto) {
+    public void removeUserRoom(final Long userId, final Long roomId) {
 
         em = emFactory.createEntityManager();
         em.getTransaction().begin();
 
-        UserRoomId userRoomId = new UserRoomId(userRoomDto.getUserId(), userRoomDto.getRoomId());
-        UserRoom userRoom = em.find(UserRoom.class, userRoomId);
-        for (Recipient recipient : userRoom.getRecipients()) {
-            if (recipient.getUserRoom().getId() == userRoomId) {
-                em.remove(userRoom);
-            }
-        }
+        User user = em.find(User.class, userId);
+        Room room = em.find(Room.class, roomId);
 
-        User user = em.find(User.class, userRoomDto.getUserId());
-        for (UserRoom ur : user.getUserUsersRooms()) {
-            if (ur.getUser().getId() == userRoomDto.getUserId()) {
-                em.remove(ur);
-            }
-        }
-
-        Room room = em.find(Room.class, userRoomDto.getUserId());
-        for (UserRoom ur : room.getRoomUsersRooms()) {
-            if (ur.getRoom().getId() == userRoomDto.getRoomId()) {
-                em.remove(ur);
-            }
-        }
+        em.flush();
         em.getTransaction().commit();
         em.close();
 
-        userRoomRepository.delete(serviceMap(userRoomDto));
+        userRoomRepository.deleteByUserAndRoom(user, room);
     }
 
     private UserRoom serviceMap(UserRoomDto userRoomDto) {
@@ -105,4 +88,5 @@ public class UserRoomService {
         System.out.println("userRoom = " + userRoomMapper.mapToUserRoom(userRoomDto, user, room).toString());
         return userRoomMapper.mapToUserRoom(userRoomDto, user, room);
     }
+
 }

@@ -53,7 +53,7 @@ public class RecipientController {
             recipientService.saveRecipient(recipientMapper.mapToRecipient(
                     recipientDto, message, user, null));
         } else if (recipientDto.getUserRoomUserId() != null && recipientDto.getUserRoomRoomId() != null && recipientDto.getUserId() == null) {
-            UserRoom userRoom = userRoomService.retrieveUserRoomByIds(recipientDto.getUserRoomUserId(), recipientDto.getUserRoomRoomId());
+            UserRoom userRoom = userRoomService.retrieveUserRoom(recipientDto.getUserRoomUserId(), recipientDto.getUserRoomRoomId());
             recipientService.saveRecipient(recipientMapper.mapToRecipient(
                     recipientDto, message, null, userRoom));
         }

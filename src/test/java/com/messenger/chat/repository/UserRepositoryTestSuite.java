@@ -2,8 +2,6 @@ package com.messenger.chat.repository;
 
 import com.messenger.chat.domain.Room;
 import com.messenger.chat.domain.User;
-import com.messenger.chat.domain.UserRoom;
-import com.messenger.chat.domain.UserRoomId;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -13,7 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.persistence.*;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.PersistenceUnit;
 import java.time.LocalDate;
 import java.util.HashSet;
 
@@ -563,43 +564,25 @@ public class UserRepositoryTestSuite {
         em.persist(room);
         em.getTransaction().commit();
 
-        em.getTransaction().begin();
-        UserRoom userRoom = UserRoom.builder()
-                .id(new UserRoomId(user.getId(), room.getId()))
-                .user(user)
-                .room(room)
-                .addedOn(LocalDate.now())
-                .recipients(new HashSet<>())
-                .build();
-
-        em.persist(room);
-        em.getTransaction().commit();
-
         //When
         em.getTransaction().begin();
-        User savedUser = em.merge(user);
-        Long userId = savedUser.getId();
-        Room savedRoom = em.merge(room);
-        savedUser.addUserRoomToUser(savedRoom);
+        user = em.merge(user);
+        Long userId = user.getId();
+        room = em.merge(room);
+        user.addUserRoomToUser(room);
 
         em.getTransaction().commit();
 
-        savedUser.setName("Milena-Zanik");
-        user = userRepository.save(savedUser);
+        user.setName("Milena-Zanik");
+        userRepository.save(user);
 
-        String str = savedUser.getName();
+        String str = user.getName();
 
         //Then
         Assert.assertEquals("Milena-Zanik", str);
 
         //CleanUp
-        em.getTransaction().begin();
-        Room aRoom = em.find(Room.class, savedRoom.getId());
-        em.refresh(aRoom);
-        em.remove(aRoom);
-
-        em.getTransaction().commit();
-        em.close();
+        roomRepository.delete(room);
         cleanUpOneUser();
 
     }

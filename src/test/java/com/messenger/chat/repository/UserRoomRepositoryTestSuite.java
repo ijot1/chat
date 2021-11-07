@@ -15,8 +15,6 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -39,20 +37,6 @@ public class UserRoomRepositoryTestSuite {
 
     @PersistenceUnit
     private EntityManagerFactory emFactory;
-
-    private void cleanUpTestData() {
-        User user1 = (User) userRepository.findAll().toArray()[0];
-        User user2 = (User) userRepository.findAll().toArray()[1];
-        User user3 = (User) userRepository.findAll().toArray()[2];
-
-        Room room = (Room) roomRepository.findAll().toArray()[0];
-
-        roomRepository.delete(room);
-
-        userRepository.delete(user1);
-        userRepository.delete(user2);
-        userRepository.delete(user3);
-    }
 
     @Before
     public void prepareUserRoomRepositoryTestData() {
@@ -162,6 +146,20 @@ public class UserRoomRepositoryTestSuite {
             emFactory.close();
     }
 
+    private void cleanUpTestData() {
+        User user1 = (User) userRepository.findAll().toArray()[0];
+        User user2 = (User) userRepository.findAll().toArray()[1];
+        User user3 = (User) userRepository.findAll().toArray()[2];
+
+        Room room = (Room) roomRepository.findAll().toArray()[0];
+
+        roomRepository.delete(room);
+
+        userRepository.delete(user1);
+        userRepository.delete(user2);
+        userRepository.delete(user3);
+    }
+
     @Test
     public void testFindAllUsersRooms() {
         //Given
@@ -267,31 +265,16 @@ public class UserRoomRepositoryTestSuite {
             Query q = em.createNativeQuery("select re.id from recipients re join users_rooms ur " +
                     "on re.id_user = ur.user_id and re.id_room = ur.room_id " +
                     "where ur.id = :id");
-            q.setParameter("id", userRoom.getId());
+
+            q.setParameter("id", userRoomId);
             userRoomRecipientsIds = q.getResultList();
         } else {
             Recipient recipient = new Recipient();
             recipient.setUserRoom(null);
         }
 
-        List<Long> userRecipientsIds = null;
-        if (recipients.size() != 0) {
-            Query q = em.createNativeQuery("select re.id from recipients re join users u " +
-                    "on re.user_id = u.user_id " +
-                    "where u.id = :id");
-            q.setParameter("id", user1.getId());
-            userRecipientsIds = q.getResultList();
-        } else {
-            Recipient recipient = new Recipient();
-            recipient.setUser(null);
-        }
-
         em.createNativeQuery("delete from recipients re where re.id in (:ids)")
-        .setParameter("ids", userRoomRecipientsIds)
-        .executeUpdate();
-
-        em.createNativeQuery("delete from recipients re where re.id in (:ids)")
-                .setParameter("ids", userRecipientsIds)
+                .setParameter("ids", userRoomRecipientsIds)
                 .executeUpdate();
 
         readUser1.getUserUsersRooms().remove(userRoom);
@@ -300,12 +283,7 @@ public class UserRoomRepositoryTestSuite {
         em.flush();
         em.getTransaction().commit();
 
-        em.getTransaction().begin();
-        UserRoom uR = em.merge(userRoom);
-        em.flush();
-        em.getTransaction().commit();
-
-        userRoomRepository.delete(uR);
+        userRoomRepository.delete(userRoom);
         int count = userRoomRepository.findAll().size();
 
         //Then

@@ -15,15 +15,10 @@ import java.time.LocalDate;
 @Setter
 @Builder
 @Entity
-@EitherOr
+//@EitherOr
 @Table(name = "RECIPIENTS")
 @NamedNativeQuery(
-        /*name = "findRecipientByMessageIdAndUserIdOrUserRoomId",*/
         name = "findRecipientsByMessageIdAndUserIdOrUserRoomId_RoomId",
-        /*query = "SELECT r.* FROM recipients r where r.message_id = :message_id " +
-                "and ((r.user_id = :user_id " +
-                "and (r.id_room is null or r.id_user is null)) " +
-                "or (r.user_id is null and r.id_room = :room_id))",*/
         query = "SELECT r.* FROM recipients r where r.message_id = :messageId " +
                 "and ((r.user_id = :userId " +
                 "and (r.id_room is null or r.id_user is null)) " +
@@ -42,14 +37,12 @@ public class Recipient implements Serializable {
     @NotNull
     private LocalDate addedOn;
 
-    @ManyToOne(
-            cascade = CascadeType.MERGE/*CascadeType.ALL*/,
-            fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MESSAGE_ID")
     private Message message;
 
     @Nullable
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
             @JoinColumn(name = "id_user", referencedColumnName = "USER_ID"),
             @JoinColumn(name = "id_room", referencedColumnName = "ROOM_ID")
@@ -57,7 +50,13 @@ public class Recipient implements Serializable {
     private UserRoom userRoom;
 
     @Nullable
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.LAZY/*,
+    cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}*/
+    )
+    /*  *** Removing child association cascading ***
+        # You need to remove the @CascadeType.ALL from the @ManyToOne association.
+        # Child entities should not cascade to parent associations.
+        # Only parent entities should cascade to child entities.*/
     @JoinColumn(name = "USER_ID")
     private User user;
 
@@ -77,9 +76,9 @@ public class Recipient implements Serializable {
         return "Recipient{" +
                 "id=" + id +
                 ", addedOn=" + addedOn +
-                /*", message=" + message +
-                ", userRoom=" + userRoom +
-                ", user=" + user +*/
+                ", message=" + message +
+                ", userRoom=" + userRoom.getRoom().getName() +
+                ", user=" + user.getName() +
                 '}';
     }
 

@@ -2,6 +2,7 @@ package com.messenger.chat.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -28,20 +29,17 @@ public class Message implements Serializable {
     @Column(name = "MESSAGE_TXT")
     private String messageText;
 
-    @Column(name = "CREATED_ON"/*, nullable = false*/)
+    @Column(name = "CREATED_ON")
     private LocalDate dateCreated;
 
-    @ManyToOne(/*targetEntity = User.class,*/
-            cascade = CascadeType.ALL,  //cascade = CascadeType.PERSIST,
-            fetch = FetchType.LAZY)     //default for ToOne EAGER
-    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Nullable
     @JoinColumn(name = "CREATED_BY")
     private User creator;
 
     @OneToMany(mappedBy = "message",
-            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
-            fetch = FetchType.LAZY,
-            orphanRemoval = true)
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+            fetch = FetchType.LAZY)
     private Set<Recipient> recipientSet;
 
     public Message(String messageText) {
@@ -75,8 +73,6 @@ public class Message implements Serializable {
                 "id=" + id +
                 ", messageText='" + messageText + '\'' +
                 ", dateCreated=" + dateCreated +
-                ", creator=" + creator +
-                ", recipientSet=" + recipientSet +
                 '}';
     }
 

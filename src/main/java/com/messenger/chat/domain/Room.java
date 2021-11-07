@@ -58,7 +58,6 @@ public class Room implements Serializable {
         return "Room{" +
                 "id=" + id +
                 ", roomsName='" + name + '\'' +
-//                ", userRoomSet=" + userRoomSet +
                 '}';
     }
 

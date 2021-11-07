@@ -2,8 +2,6 @@ package com.messenger.chat.repository;
 
 import com.messenger.chat.domain.*;
 import com.messenger.chat.exception.EntityNotFoundException;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,10 +13,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.persistence.*;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.PersistenceUnit;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -186,7 +189,6 @@ public class RecipientRepositoryTestSuite {
                     .recipients(new HashSet<>())
                     .build();
             em.persist(userRoom3);
-
             em.getTransaction().commit();
 
             em.getTransaction().begin();
@@ -268,13 +270,11 @@ public class RecipientRepositoryTestSuite {
             rbEx.printStackTrace(System.err);
         }
 
-        if (em != null && em.isOpen())
-            em.close(); // You create it, you close it!
-
     }
 
     @After
     public void cleanUpRepository() {
+        System.out.println("clean#recipientRepository.findAll().size() = " + recipientRepository.findAll().size());
         em = emFactory.createEntityManager();
 
         em.getTransaction().begin();
@@ -296,12 +296,57 @@ public class RecipientRepositoryTestSuite {
         Message message1 = em.find(Message.class, message1Id);
         Message message2 = em.find(Message.class, message2Id);
 
-        user1.removeRecipient(recipient1);
-        user2.removeRecipient(recipient2);
-        user2.removeRecipient(recipient3);
+        if (recipient1 != null) {
+            user1.removeRecipient(recipient1);
+        }
+        if (recipient2 != null) {
+            user2.removeRecipient(recipient2);
+        }
+        if (recipient3 != null) {
+            user2.removeRecipient(recipient3);
+        }
 
+        user1.removeUserRoomFromUser(room);
         user2.removeUserRoomFromUser(room);
         user3.removeUserRoomFromUser(room);
+
+        user1.removeMessage(message1);
+        user2.removeMessage(message2);
+
+        room.removeUserRoomFromRoom(user1);
+        room.removeUserRoomFromRoom(user2);
+        room.removeUserRoomFromRoom(user3);
+
+        if (recipient1 != null) {
+            message2.deleteMessageRecipient(recipient1);
+        }
+        if (recipient2 != null) {
+            message1.getRecipientSet().remove(recipient2);
+        }
+        if (recipient3 != null) {
+            message1.getRecipientSet().remove(recipient3);
+        }
+
+
+        if (recipient2 != null) {
+            userRoom2.removeMessageRecipient(recipient2);
+        }
+
+        if (recipient3 != null) {
+            userRoom3.removeMessageRecipient(recipient3);
+        }
+
+        if (recipient1 != null) {
+            em.remove(recipient1);
+        }
+
+        if (recipient2 != null) {
+            em.remove(recipient2);
+        }
+
+        if (recipient3 != null) {
+            em.remove(recipient3);
+        }
 
         em.remove(message1);
         em.remove(message2);
@@ -309,13 +354,15 @@ public class RecipientRepositoryTestSuite {
         em.remove(user1);
         em.remove(user2);
         em.remove(user3);
+
         em.remove(room);
 
         em.flush();
         em.clear();
         em.getTransaction().commit();
 
-        em.close();
+        if (em != null && em.isOpen())
+            em.close(); // You create it, you close it!
 
     }
 
@@ -361,37 +408,66 @@ public class RecipientRepositoryTestSuite {
     @Test
     public void testFindRecipientById() {
         //Given
+        em = emFactory.createEntityManager();
+        Long recipientId = recipient1Id;
         //@Before prepared data
 
         //When
-        Recipient recipient = recipientRepository.findById(recipient1Id).orElseThrow(() -> new EntityNotFoundException(Recipient.class, recipient1Id));
-        String str = recipient.getUser().getName();
+        Recipient recipient = recipientRepository.findById(recipientId).orElseThrow(
+                () -> new EntityNotFoundException(Recipient.class, recipientId));
+
+        Message message = recipient.getMessage();
+
+        em.getTransaction().begin();
+        message = em.merge(message);
+        String str = message.getMessageText();
+        em.getTransaction().commit();
+        em.close();
+
         //Then
-        Assert.assertEquals("Irena-Janik", str);
+        Assert.assertEquals("Message #2 text", str);
     }
 
     @Test
     public void testSaveRecipient() {
         //Given
-        EntityManager em = emFactory.createEntityManager();
-
-        Message message2 = (Message) messageRepository.findAll().toArray()[1];
-        User user3 = (User) userRepository.findAll().toArray()[2];
+        em = emFactory.createEntityManager();
 
         em.getTransaction().begin();
-        em.merge(message2);
-        em.merge(user3);
-
+        Message message2 = em.find(Message.class, message2Id);
+        System.out.println("message2 = " + message2.toString());
+        User user3 = em.find(User.class, user3Id);
+        System.out.println("user3 = " + user3.toString());
 
         Recipient recipient = Recipient.builder()
                 .id(null)
                 .addedOn(LocalDate.now())
                 .message(message2)
-                .userRoom(null)
                 .user(user3)
+                .userRoom(null)
                 .build();
 
         recipientRepository.save(recipient);
+        em.flush();
+        em.clear();
+
+        em.getTransaction().commit();
+        em.getTransaction().begin();
+
+        recipient = em.merge(recipient);
+        message2 = em.merge(message2);
+        user3= em.merge(user3);
+
+        message2.addMessageRecipient(recipient);
+        user3.addRecipient(recipient);
+        recipient.setUser(user3);
+        recipient.setMessage(message2);
+
+        message2.addMessageRecipient(recipient);
+        user3.addRecipient(recipient);
+
+        em.flush();
+        em.clear();
         em.getTransaction().commit();
 
         //When
@@ -403,18 +479,72 @@ public class RecipientRepositoryTestSuite {
         //CleanUp
         em.getTransaction().begin();
 
+        recipient = em.merge(recipient);
+        user3 = em.merge(user3);
+        message2 = em.merge(message2);
+
+        message2.deleteMessageRecipient(recipient);
+        user3.removeMessage(message2);
+        user3.removeRecipient(recipient);
+
         em.remove(em.contains(recipient) ? recipient : em.merge(recipient));
+        em.flush();
+        em.clear();
         em.getTransaction().commit();
-//        em.close();
     }
 
     @Test
     public void testDeleteRecipientById() {
         //Given
         //@Before prepared data
+        em = emFactory.createEntityManager();
 
         //When
-        recipientRepository.deleteById(recipient3Id);
+        Long id = recipient3Id;
+        em.getTransaction().begin();
+        Recipient recipient = em.find(Recipient.class, id);
+
+        Message message = em.find(Message.class, recipient.getMessage().getId());
+        Set<Recipient> messageRecipients = message.getRecipientSet();
+        List<Recipient> toRemove = new ArrayList<>();
+        for (Recipient r : messageRecipients) {
+            if (r == recipient) {
+                toRemove.add(r);
+                r.setMessage(null);
+            }
+        }
+        messageRecipients.removeAll(toRemove);
+
+        if (recipient.getUser() != null) {
+            User user = em.find(User.class, recipient.getUser().getId());
+            Set<Recipient> userRecipients = user.getRecipients();
+            toRemove = new ArrayList<>();
+            for (Recipient r : userRecipients) {
+                if (r.getUser() == user) {
+                    toRemove.add(r);
+                    r.setUser(null);
+                }
+            }
+            userRecipients.removeAll(toRemove);
+        }
+
+        if (recipient.getUserRoom() != null) {
+            UserRoom userRoom = em.find(UserRoom.class, recipient.getUserRoom().getId());
+            Set<Recipient> userRoomRecipients = userRoom.getRecipients();
+            toRemove = new ArrayList<>();
+            for (Recipient r : userRoomRecipients) {
+                if (r.getUserRoom() == userRoom) {
+                    toRemove.add(r);
+                    r.setUserRoom(null);
+                }
+            }
+            userRoomRecipients.removeAll(toRemove);
+        }
+
+        em.flush();
+        em.getTransaction().commit();
+
+        recipientRepository.deleteById(id);
         int count = recipientRepository.findAll().size();
 
         //Then

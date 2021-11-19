@@ -1,8 +1,6 @@
 package com.messenger.chat.repository;
 
 import com.messenger.chat.domain.Room;
-import com.messenger.chat.domain.User;
-import com.messenger.chat.domain.UserRoom;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,7 +14,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceUnit;
-import java.time.LocalDate;
 import java.util.HashSet;
 
 @RunWith(SpringRunner.class)

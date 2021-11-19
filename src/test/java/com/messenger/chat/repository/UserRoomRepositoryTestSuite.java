@@ -9,9 +9,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.event.annotation.AfterTestClass;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.persistence.*;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.PersistenceUnit;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -36,12 +40,19 @@ public class UserRoomRepositoryTestSuite {
     private EntityManager em;
 
     @PersistenceUnit
-    private EntityManagerFactory emFactory;
+    private EntityManagerFactory emFactory = Persistence.createEntityManagerFactory("ChatPU");
+
+    public static Long user1Id;
+    public static Long user2Id;
+    public static Long user3Id;
+
+    public static Long roomId;
+
+    public static UserRoomId userRoom1Id;
+    public static UserRoomId userRoom2Id;
 
     @Before
     public void prepareUserRoomRepositoryTestData() {
-        emFactory = Persistence.createEntityManagerFactory("ChatPU");
-
         em = emFactory.createEntityManager();
         em.getTransaction().begin();
         User user1 = User.builder()
@@ -102,6 +113,7 @@ public class UserRoomRepositoryTestSuite {
 
         em.getTransaction().begin();
         em.merge(user1);
+        user1Id = user1.getId();
         em.merge(room);
         UserRoom userRoom1 = UserRoom.builder()
                 .id(new UserRoomId(user1.getId(), room.getId()))
@@ -115,7 +127,11 @@ public class UserRoomRepositoryTestSuite {
 
         em.getTransaction().begin();
         em.merge(user2);
+        user2Id = user2.getId();
+        em.merge(user3);
+        user3Id = user3.getId();
         em.merge(room);
+        roomId = room.getId();
         UserRoom userRoom2 = UserRoom.builder()
                 .id(new UserRoomId(user2.getId(), room.getId()))
                 .user(user2)
@@ -130,7 +146,9 @@ public class UserRoomRepositoryTestSuite {
         em.merge(user1);
         em.merge(user2);
         em.merge(userRoom1);
+        userRoom1Id = userRoom1.getId();
         em.merge(userRoom2);
+        userRoom2Id = userRoom2.getId();
         user1.getUserUsersRooms().add(userRoom2);
         user2.getUserUsersRooms().add(userRoom1);
         em.getTransaction().commit();
@@ -142,22 +160,35 @@ public class UserRoomRepositoryTestSuite {
         cleanUpTestData();
         if (em != null && em.isOpen())
             em.close();
+    }
+
+    @AfterTestClass
+    public void closeFactory() {
         if (emFactory != null)
             emFactory.close();
     }
 
     private void cleanUpTestData() {
-        User user1 = (User) userRepository.findAll().toArray()[0];
-        User user2 = (User) userRepository.findAll().toArray()[1];
-        User user3 = (User) userRepository.findAll().toArray()[2];
+        if (userRoomRepository.findAll().size() != 0) {
+            userRoomRepository.deleteAll();
+        }
 
-        Room room = (Room) roomRepository.findAll().toArray()[0];
+        em = emFactory.createEntityManager();
+        em.getTransaction().begin();
 
-        roomRepository.delete(room);
+        User user1 = em.find(User.class, user1Id);
+        User user2 = em.find(User.class, user2Id);
+        User user3 = em.find(User.class, user3Id);
 
-        userRepository.delete(user1);
-        userRepository.delete(user2);
-        userRepository.delete(user3);
+        Room room = em.find(Room.class, roomId);
+
+        em.remove(user1);
+        em.remove(user2);
+        em.remove(user3);
+
+        em.remove(room);
+
+        em.getTransaction().commit();
     }
 
     @Test
@@ -176,12 +207,10 @@ public class UserRoomRepositoryTestSuite {
     public void testFindUserRoomById() {
         //Given
         //@Before prepared data
-        User user1 = (User) userRepository.findAll().toArray()[0];
-        Room room = (Room) roomRepository.findAll().toArray()[0];
 
         em.getTransaction().begin();
-        em.merge(user1);
-        em.merge(room);
+        User user1 = em.find(User.class, user1Id);
+        Room room = em.find(Room.class, roomId);
         UserRoomId userRoomId = new UserRoomId(user1.getId(), room.getId());
         em.getTransaction().commit();
 
@@ -218,20 +247,18 @@ public class UserRoomRepositoryTestSuite {
         //Given
         //@Before prepared data
         em = emFactory.createEntityManager();
-
-        User user3 = (User) userRepository.findAll().toArray()[2];
-        Room room = (Room) roomRepository.findAll().toArray()[0];
-
         em.getTransaction().begin();
-        User readUser3 = em.merge(user3);
-        Room readRoom = em.merge(room);
+
+        User user3 = em.find(User.class, user3Id);
+        Room room = em.find(Room.class, roomId);
+
         em.getTransaction().commit();
         em.close();
 
         UserRoom userRoom = UserRoom.builder()
-                .id(new UserRoomId(readUser3.getId(), readRoom.getId()))
-                .user(readUser3)
-                .room(readRoom)
+                .id(new UserRoomId(user3.getId(), room.getId()))
+                .user(user3)
+                .room(room)
                 .addedOn(LocalDate.now())
                 .recipients(new HashSet<>())
                 .build();
@@ -249,42 +276,31 @@ public class UserRoomRepositoryTestSuite {
         //Given
         em = emFactory.createEntityManager();
         //@Before prepared data
-        User user1 = (User) userRepository.findAll().toArray()[0];
-        Room room = (Room) roomRepository.findAll().toArray()[0];
-        List<Recipient> recipients = recipientRepository.findAll();
 
         //When
         em.getTransaction().begin();
-        User readUser1 = em.getReference(User.class, user1.getId());
-        Room readRoom = em.merge(room);
+        User user1 = em.find(User.class, user1Id);
+        Room room = em.find(Room.class, roomId);
+        List<Recipient> recipients = recipientRepository.findAll();
 
-        UserRoom userRoom = em.find(UserRoom.class, new UserRoomId(readUser1.getId(), readRoom.getId()));
+        UserRoom userRoom = em.find(UserRoom.class, new UserRoomId(user1.getId(), room.getId()));
         UserRoomId userRoomId = userRoom.getId();
-        List<Long> userRoomRecipientsIds = null;
-        if (recipients.size() != 0) {
-            Query q = em.createNativeQuery("select re.id from recipients re join users_rooms ur " +
-                    "on re.id_user = ur.user_id and re.id_room = ur.room_id " +
-                    "where ur.id = :id");
 
-            q.setParameter("id", userRoomId);
-            userRoomRecipientsIds = q.getResultList();
-        } else {
-            Recipient recipient = new Recipient();
-            recipient.setUserRoom(null);
-        }
+        System.out.println("#1 " + userRoomRepository.findAll().size());
 
-        em.createNativeQuery("delete from recipients re where re.id in (:ids)")
-                .setParameter("ids", userRoomRecipientsIds)
-                .executeUpdate();
+        user1.getUserUsersRooms().remove(userRoom);
+        room.getRoomUsersRooms().remove(userRoom);
 
-        readUser1.getUserUsersRooms().remove(userRoom);
-        readRoom.getRoomUsersRooms().remove(userRoom);
+        System.out.println("#2 " + userRoomRepository.findAll().size());
 
         em.flush();
         em.getTransaction().commit();
 
+
+        System.out.println("#3 " + userRoomRepository.findAll().size());
         userRoomRepository.delete(userRoom);
         int count = userRoomRepository.findAll().size();
+        System.out.println("#4 " + count);
 
         //Then
         Assert.assertEquals(1, count);

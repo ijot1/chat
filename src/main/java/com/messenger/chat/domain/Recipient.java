@@ -50,13 +50,13 @@ public class Recipient implements Serializable {
     private UserRoom userRoom;
 
     @Nullable
-    @ManyToOne(fetch = FetchType.LAZY/*,
-    cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH}*/
-    )
+    @ManyToOne(fetch = FetchType.LAZY)
     /*  *** Removing child association cascading ***
         # You need to remove the @CascadeType.ALL from the @ManyToOne association.
         # Child entities should not cascade to parent associations.
         # Only parent entities should cascade to child entities.*/
+    /*https://stackoverflow.com/questions/13370221/persistentobjectexception-detached-entity-passed-to-persist-thrown-by-jpa-and-h
+    * answer #21; Vlad Michalcea*/
     @JoinColumn(name = "USER_ID")
     private User user;
 

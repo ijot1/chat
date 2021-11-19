@@ -274,7 +274,6 @@ public class RecipientRepositoryTestSuite {
 
     @After
     public void cleanUpRepository() {
-        System.out.println("clean#recipientRepository.findAll().size() = " + recipientRepository.findAll().size());
         em = emFactory.createEntityManager();
 
         em.getTransaction().begin();
@@ -296,15 +295,7 @@ public class RecipientRepositoryTestSuite {
         Message message1 = em.find(Message.class, message1Id);
         Message message2 = em.find(Message.class, message2Id);
 
-        if (recipient1 != null) {
-            user1.removeRecipient(recipient1);
-        }
-        if (recipient2 != null) {
-            user2.removeRecipient(recipient2);
-        }
-        if (recipient3 != null) {
-            user2.removeRecipient(recipient3);
-        }
+        user1.removeRecipient(recipient1);
 
         user1.removeUserRoomFromUser(room);
         user2.removeUserRoomFromUser(room);
@@ -313,37 +304,32 @@ public class RecipientRepositoryTestSuite {
         user1.removeMessage(message1);
         user2.removeMessage(message2);
 
-        room.removeUserRoomFromRoom(user1);
-        room.removeUserRoomFromRoom(user2);
-        room.removeUserRoomFromRoom(user3);
-
-        if (recipient1 != null) {
-            message2.deleteMessageRecipient(recipient1);
-        }
-        if (recipient2 != null) {
-            message1.getRecipientSet().remove(recipient2);
-        }
-        if (recipient3 != null) {
-            message1.getRecipientSet().remove(recipient3);
-        }
-
-
-        if (recipient2 != null) {
-            userRoom2.removeMessageRecipient(recipient2);
-        }
-
+        userRoom2.removeMessageRecipient(recipient2);
         if (recipient3 != null) {
             userRoom3.removeMessageRecipient(recipient3);
         }
 
-        if (recipient1 != null) {
-            em.remove(recipient1);
+        room.removeUserRoomFromRoom(user1);
+        room.removeUserRoomFromRoom(user2);
+        room.removeUserRoomFromRoom(user3);
+
+        em.remove(userRoom1);
+        em.remove(userRoom2);
+        em.remove(userRoom3);
+
+        message2.deleteMessageRecipient(recipient1);
+        message1.deleteMessageRecipient(recipient2);
+        if (recipient3 != null) {
+            message1.deleteMessageRecipient(recipient3);
         }
 
-        if (recipient2 != null) {
-            em.remove(recipient2);
+        userRoom2.removeMessageRecipient(recipient2);
+        if (recipient3 != null) {
+            userRoom3.removeMessageRecipient(recipient3);
         }
 
+        em.remove(recipient1);
+        em.remove(recipient2);
         if (recipient3 != null) {
             em.remove(recipient3);
         }
@@ -435,9 +421,7 @@ public class RecipientRepositoryTestSuite {
 
         em.getTransaction().begin();
         Message message2 = em.find(Message.class, message2Id);
-        System.out.println("message2 = " + message2.toString());
         User user3 = em.find(User.class, user3Id);
-        System.out.println("user3 = " + user3.toString());
 
         Recipient recipient = Recipient.builder()
                 .id(null)
@@ -456,7 +440,7 @@ public class RecipientRepositoryTestSuite {
 
         recipient = em.merge(recipient);
         message2 = em.merge(message2);
-        user3= em.merge(user3);
+        user3 = em.merge(user3);
 
         message2.addMessageRecipient(recipient);
         user3.addRecipient(recipient);

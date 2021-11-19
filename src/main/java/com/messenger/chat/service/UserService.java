@@ -60,15 +60,36 @@ public class UserService {
         em.getTransaction().begin();
 
         User user = em.find(User.class, id);
-        user.getFriends().clear();
 
-        Query q = em.createNativeQuery("select * from users u", User.class);
+        if (user.getFriends() != null) {
+            user.getFriends().clear();
+        }
+        if (user.getRecipients() != null) {
+            user.getRecipients().clear();
+        }
+        if (user.getMessages() != null) {
+            user.getMessages().clear();
+        }
+        if (user.getUserUsersRooms() != null) {
+            user.getUserUsersRooms().clear();
+        }
+
+        /*Query q = em.createNativeQuery("select * from users u", User.class);
         List<User> users = q.getResultList();
         for (User u : users) {
             if (u.getFriends().contains(user)) {
                 u.getFriends().remove(user);
             }
-        }
+            if (u.getMessages() != null) {
+                u.getMessages().clear();
+            }
+            if (u.getRecipients() != null) {
+                u.getRecipients().clear();
+            }
+            if (u.getUserUsersRooms() != null) {
+                u.getUserUsersRooms().clear();
+            }
+        }*/
         em.flush();
         em.getTransaction().commit();
         em.close();

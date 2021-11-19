@@ -1,6 +1,5 @@
 package com.messenger.chat.repository;
 
-import com.messenger.chat.domain.Room;
 import com.messenger.chat.domain.User;
 import org.junit.After;
 import org.junit.Assert;
@@ -27,6 +26,9 @@ public class UserRepositoryTestSuite {
 
     @Autowired
     public RoomRepository roomRepository;
+
+    @Autowired
+    public RoomRepository userRoomRepository;
 
     @Autowired
     private EntityManager em;
@@ -533,13 +535,10 @@ public class UserRepositoryTestSuite {
     @Test
     public void testSaveUser() {
         //Given
-        em = emFactory.createEntityManager();
-
-        em.getTransaction().begin();
         User user = User.builder()
                 .id(null)
                 .nick("mz")
-                .name("")
+                .name("Milena-Zanik")
                 .sex('W')
                 .location("Katowice")
                 .createdOn(LocalDate.now())
@@ -550,39 +549,15 @@ public class UserRepositoryTestSuite {
                 .userUsersRooms(new HashSet<>())
                 .friends(new HashSet<>())
                 .build();
-
-        em.persist(user);
-        em.getTransaction().commit();
-
-        em.getTransaction().begin();
-        Room room = Room.builder()
-                .id(null)
-                .name("Silence Service")
-                .roomUsersRooms(new HashSet<>())
-                .build();
-
-        em.persist(room);
-        em.getTransaction().commit();
-
-        //When
-        em.getTransaction().begin();
-        user = em.merge(user);
-        Long userId = user.getId();
-        room = em.merge(room);
-        user.addUserRoomToUser(room);
-
-        em.getTransaction().commit();
-
-        user.setName("Milena-Zanik");
         userRepository.save(user);
 
+        //When
         String str = user.getName();
 
         //Then
         Assert.assertEquals("Milena-Zanik", str);
 
         //CleanUp
-        roomRepository.delete(room);
         cleanUpOneUser();
 
     }

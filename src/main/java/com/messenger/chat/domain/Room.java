@@ -26,8 +26,7 @@ public class Room implements Serializable {
     private String name;
 
     @OneToMany(mappedBy = "room",
-            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH},
-            orphanRemoval = true)
+            cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<UserRoom> roomUsersRooms = new HashSet<>();
 
     public Room(String name) {
